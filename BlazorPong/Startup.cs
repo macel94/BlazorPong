@@ -1,15 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using BlazorPong.Controllers;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BlazorPong.Data;
+using BlazorPong.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BlazorPong
 {
@@ -29,6 +26,9 @@ namespace BlazorPong
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+            services.AddSingleton <IHubContext<GameHub, IBlazorPongClient>, IHubContext<GameHub, IBlazorPongClient>>();
+            services.AddSingleton<ServerGameController>();
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -53,6 +53,8 @@ namespace BlazorPong
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
+                // Gli faccio usare il gamehub
+                endpoints.MapHub<GameHub>("/gamehub");
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

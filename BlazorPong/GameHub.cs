@@ -1,39 +1,107 @@
-﻿using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using System.Threading.Tasks;
+using BlazorPong.Controllers;
+using BlazorPong.Interfaces;
+using BlazorPong.Shared;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
+//using Microsoft.Extensions.Logging;
 
 namespace BlazorPong
 {
-    public class GameHub : Hub
+    public class GameHub : Hub<IBlazorPongClient>
     {
-        ILogger<GameHub> _logger;
-        private static readonly string BOT_GROUP = "BOT";
+        //ILogger<GameHub> _logger;
+        private ServerGameController _gameController;
 
-        public GameHub(ILogger<GameHub> logger)
+        public void AddGameObject(string id)
         {
-            _logger = logger;
+            _gameController.AddGameObject(id);
         }
 
-        public async Task OnBotConnected()
+        // TODO -FBE: Controlla se possibile gestire tramite gruppi(players e spectators) e se si può implementare un bot che gioca contro di te
+        //public async Task OnBotConnected()
+        //{
+        //    await Groups.AddToGroupAsync(Context.ConnectionId, BOT_GROUP);
+        //    _logger.LogInformation("Bot joined");
+        //}
+
+        //public async Task OnBotDisconnected()
+        //{
+        //    await Groups.RemoveFromGroupAsync(Context.ConnectionId, BOT_GROUP);
+        //    _logger.LogInformation("Bot left");
+        //}
+
+        //public async Task OnBotMoveReceived(string[] board, string connectionID)
+        //{
+        //    await Clients.Client(connectionID).SendAsync("NotifyUser", board);
+        //}
+
+        //public async Task OnUserMoveReceived(string[] board)
+        //{
+        //    await Clients.All.SendAsync("NotifyUser", board, Context.ConnectionId);
+        //}
+
+        public void UpdateGameObjectPosition(GameObject clientGameObject)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, BOT_GROUP);
-            _logger.LogInformation("Bot joined");
+            string playerName = Clients.Caller.PlayerName;
+            Trace.TraceInformation(playerName + " moved to position " + clientGameObject.Top);
+            clientGameObject.LastUpdatedBy = Context.ConnectionId;
+            _gameController.UpdateGameObjectPosition(clientGameObject);
         }
 
-        public async Task OnBotDisconnected()
+        public Enums.ClientType GetClientType()
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, BOT_GROUP);
-            _logger.LogInformation("Bot left");
+            if (_gameController.Player1ConnectionId == Context.ConnectionId)
+                return Enums.ClientType.Player1;
+
+            if (_gameController.Player2ConnectionId == Context.ConnectionId)
+                return Enums.ClientType.Player2;
+
+            return Enums.ClientType.Spectator;
         }
 
-        public async Task OnBotMoveReceived(string[] board, string connectionID)
+        public void OnPlayer1Hit()
         {
-            await Clients.Client(connectionID).SendAsync("NotifyUser", board);
+            _gameController.OnPlayer1Hit();
         }
 
-        public async Task OnUserMoveReceived(string[] board)
+        public void OnPlayer2Hit()
         {
-            await Clients.Group(BOT_GROUP).SendAsync("NotifyBot", board, Context.ConnectionId);
+            _gameController.OnPlayer2Hit();
+        }
+
+        public void OnConnected()
+        {
+            // Keep track of who is player1/player2
+            if (_gameController.Player1ConnectionId == null)
+            {
+                _gameController.Player1ConnectionId = Context.ConnectionId;
+            }
+            else if (_gameController.Player2ConnectionId == null)
+            {
+                _gameController.Player2ConnectionId = Context.ConnectionId;
+            }
+
+            _gameController.UpdateGameObjectPositionsForClient(Context.ConnectionId);
+        }
+
+        /// <summary>
+        /// Disconnessione forzata o voluta che sia
+        /// </summary>
+        /// <param name="stopCalled">
+        /// true, if stop was called on the client closing the connection gracefully
+        /// false, if the connection has been lost
+        /// </param>
+        public void OnDisconnected(bool stopCalled)
+        {
+            if (_gameController.Player1ConnectionId == Context.ConnectionId)
+            {
+                _gameController.Player1ConnectionId = null;
+            }
+            else if (_gameController.Player2ConnectionId == Context.ConnectionId)
+            {
+                _gameController.Player2ConnectionId = null;
+            }
         }
     }
 }
