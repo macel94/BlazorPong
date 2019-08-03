@@ -1,83 +1,32 @@
 ﻿@page "/pong"
 @using Microsoft.AspNetCore.SignalR.Client
 
-@if (@playerWon != null)
-{
-    <div class="container h-100" style="width:500px;background:#ff6a00;padding:40px">
-        <div class="row h-50 justify-content-center align-items-center">
-            <span style="font-size:xx-large">@playerWon Won !</span>
-        </div>
-    </div>
-}
-else if (@isDraw)
-{
-    <div class="container h-100" style="width:600px;background:#ff6a00;padding:40px">
-        <div class="row h-50 justify-content-center align-items-center">
-            <span style="font-size:xx-large">It's a Draw !</span>
-        </div>
-    </div>
-}
-else if (@playerWon == null)
-{
-
-    
-}
-<div class="text-center" style="padding:5px;">
-    <button class="btn btn-link" style="color:#ff6a00;font-weight:600" @onclick="@(()=>RestartGame())">Restart</button>
-</div>
-
 @code {
-    private string[] board = new string[9];
-    HubConnection connection;
-    GameEngine engine = new GameEngine();
-    string playerWon = null;
-    bool isDraw = false;
+    HubConnection _connection;
+    // Per non lasciare cliccare nulla fino a che non esiste una connessione reale
+    bool clickOnPageDisabled = true;
 
     protected override async Task OnInitAsync()
     {
-        for (var i = 0; i < 9; i++)
-        {
-            board[i] = i.ToString();
-        }
-
-        //Initialize SignalR
-        connection = new HubConnectionBuilder()
-            .WithUrl("https://localhost:5001/gamehub")
+        // 44364 DEVELOPMENT(IIS)
+        // 443 PROD o DEV BlazorPong
+#if DEBUG
+        _connection = new HubConnectionBuilder()
+            .WithUrl("https://localhost/gamehub")
             .Build();
+#else
+    _connection = new HubConnectionBuilder()
+        .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
+        .Build();
+#endif
 
-        connection.On("OnPlayer1Hit", OnPlayer1Hit);
-        await connection.StartAsync();
+        _connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
+        await _connection.StartAsync();
+        clickOnPageDisabled = false;
     }
 
-    private string ShowBoard(int index)
+    private Task UpdateGameObjectPositionOnClient(GameObject updatedObj)
     {
-        return engine.IsPlayed(board[index]) ? board[index] : string.Empty;
-    }
-
-    private void RestartGame()
-    {
-        playerWon = null;
-        isDraw = false;
-        for (var i = 0; i < 9; i++)
-        {
-            board[i] = i.ToString();
-        }
-        StateHasChanged();
-    }
-
-    //Task NotifyUser(string[] newboard)
-    //{
-    //    board = newboard;
-    //    if (engine.IsWon(board, engine.botPlayer))
-    //        playerWon = "Bot";
-    //    else if (engine.GetAvailableSpots(board).Length == 0)
-    //        isDraw = true;
-    //    StateHasChanged();
-    //    return Task.CompletedTask;
-    //}
-
-    private Task OnPlayer1Hit()
-    {
-        return Task.CompletedTask;
+        throw new NotImplementedException();
     }
 }

@@ -5,8 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BlazorPong.Data;
-using BlazorPong.Interfaces;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace BlazorPong
 {
@@ -25,8 +24,9 @@ namespace BlazorPong
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddTransient<HubConnectionBuilder>();
             services.AddSingleton<WeatherForecastService>();
-            services.AddSingleton <IHubContext<GameHub, IBlazorPongClient>, IHubContext<GameHub, IBlazorPongClient>>();
+            services.AddSingleton<GameHub>();
             services.AddSingleton<ServerGameController>();
             services.AddSignalR();
         }
@@ -34,20 +34,25 @@ namespace BlazorPong
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+            //TODO -oFBE: Utilizza lo standard qui sotto
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseDeveloperExceptionPage();
+            //}
+            //else
+            //{
+            //    app.UseExceptionHandler("/Home/Error");
+            //    //The default HSTS value is 30 days.You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            //    app.UseHsts();
+            //}
+
+            // NB: Per ora utilizzo sempre la pagina dell'eccezione specifica anche in produzione,
+            // essendo un progetto in corso di sviluppo e comunque a scopo dimostrativo.
+            app.UseDeveloperExceptionPage();
+            app.UseHsts();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>

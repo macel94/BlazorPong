@@ -19,7 +19,7 @@ namespace BlazorPong.Shared
             foreach (var gameObject in gameObjectsMoved)
             {
                 // Qui si richiama su ogni client l'evento UpdateGameObjectPosition, che poi a sua volta richiamerà il metodo lato server
-                _hubContext.Clients.AllExcept(gameObject.LastUpdatedBy).UpdateGameObjectPosition(gameObject);
+                _hubContext.Clients.AllExcept(gameObject.LastUpdatedBy).UpdateGameObjectPositionOnClient(gameObject);
                 gameObject.Moved = false;
             }
         }
@@ -28,7 +28,7 @@ namespace BlazorPong.Shared
         {
             // Signal only the client with connectionId
             foreach (var gameObject in gameObjects)
-                _hubContext.Clients.Client(connectionId).UpdateGameObjectPosition(gameObject);
+                _hubContext.Clients.Client(connectionId).UpdateGameObjectPositionOnClient(gameObject);
         }
     }
 }

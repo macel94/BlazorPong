@@ -7,6 +7,6 @@ namespace BlazorPong.Interfaces
     public interface IBlazorPongClient : IClientProxy
     {
         string PlayerName { get; set; }
-        void UpdateGameObjectPosition(GameObject gameObject);
+        void UpdateGameObjectPositionOnClient(GameObject gameObject);
     }
 }
