@@ -1,0 +1,35 @@
+﻿#area {
+    width: 1000px;
+    height: 500px;
+    background-color: hotpink;
+}
+
+#leftverticalboundary {
+    background-color: black;
+    width: 10px;
+    height: 500px;
+    position: absolute;
+}
+
+#rightverticalboundary {
+    background-color: black;
+    width: 10px;
+    height: 500px;
+    left: 1000px;
+    position: absolute;
+}
+
+#tophorizontalboundary {
+    background-color: black;
+    width: 1000px;
+    height: 10px;
+    position: absolute;
+}
+
+#bottomhorizontalboundary {
+    background-color: black;
+    width: 1000px;
+    height: 10px;
+    top: 500px;
+    position: absolute;
+}

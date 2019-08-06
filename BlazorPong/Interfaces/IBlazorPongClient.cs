@@ -1,12 +1,11 @@
 ﻿using System.Threading.Tasks;
 using BlazorPong.Shared;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Hosting;
 
 namespace BlazorPong.Interfaces
 {
-    public interface IBlazorPongClient : IClientProxy
+    public interface IBlazorPongClient : IHostedService
     {
-        string PlayerName { get; set; }
-        void UpdateGameObjectPositionOnClient(GameObject gameObject);
+        Task UpdateGameObjectPositionOnClient(GameObject gameObject);
     }
 }

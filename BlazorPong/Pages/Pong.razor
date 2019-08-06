@@ -1,32 +1,150 @@
 ﻿@page "/pong"
+@using System.Threading
+@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.SignalR.Client
 
-@code {
-    HubConnection _connection;
-    // Per non lasciare cliccare nulla fino a che non esiste una connessione reale
-    bool clickOnPageDisabled = true;
+<style>
+    #player1 {
+        background-color: red;
+        width: 20px;
+        height: 100px;
+        position: absolute;
+        left: @(gameObjects.FirstOrDefault(g => g.Id.Equals("player1"))?.LeftPx ?? "100px");
+        top: @(gameObjects.FirstOrDefault(g => g.Id.Equals("player1"))?.TopPx ?? "100px");
+    }
 
-    protected override async Task OnInitAsync()
+    #player2 {
+        background-color: green;
+        width: 20px;
+        height: 100px;
+        position: absolute;
+        left: @(gameObjects.FirstOrDefault(g => g.Id.Equals("player2"))?.LeftPx ?? "880px");
+        top: @(gameObjects.FirstOrDefault(g => g.Id.Equals("player2"))?.TopPx ?? "100px");
+    }
+
+    #ball {
+        background-color: blue;
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        left: @(gameObjects.FirstOrDefault(g => g.Id.Equals("ball"))?.LeftPx ?? "500px");
+        top: @(gameObjects.FirstOrDefault(g => g.Id.Equals("ball"))?.TopPx ?? "250px");
+    }
+
+    .drg {
+
+    }
+</style>
+<div id="area">
+    @foreach (var go in gameObjects)
     {
-        // 44364 DEVELOPMENT(IIS)
-        // 443 PROD o DEV BlazorPong
+        // ball, player1 e player2
+        <div id="@go.Id" draggable="@go.Draggable" @ondrag="@(e => MoveOnAxisAndSignal(e, go))" ></div>
+    }
+    <div id="tophorizontalboundary"></div>
+        <div id="bottomhorizontalboundary"></div>
+        <div id="leftverticalboundary"></div>
+        <div id="rightverticalboundary"></div>
+    </div>
+
+    <div id="message">@message</div>
+
+    @code {
+        List<GameObject> gameObjects = new List<GameObject>();
+        HubConnection _connection;
+        // Per non lasciare cliccare nulla fino a che non esiste una connessione reale
+        bool clickOnPageDisabled = true;
+        Enums.ClientType playerType;
+        string message;
+
+        protected override async Task OnInitAsync()
+        {
+            // 44364 DEVELOPMENT(IIS)
+            // 443 PROD o DEV BlazorPong
 #if DEBUG
-        _connection = new HubConnectionBuilder()
-            .WithUrl("https://localhost/gamehub")
-            .Build();
+            _connection = new HubConnectionBuilder()
+                .WithUrl("https://localhost/gamehub")
+                .WithAutomaticReconnect()
+                .Build();
 #else
     _connection = new HubConnectionBuilder()
         .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
+        .WithAutomaticReconnect()
         .Build();
 #endif
 
-        _connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
-        await _connection.StartAsync();
-        clickOnPageDisabled = false;
-    }
+            _connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
+            await _connection.StartAsync();
 
-    private Task UpdateGameObjectPositionOnClient(GameObject updatedObj)
-    {
-        throw new NotImplementedException();
+            // Ora che la connessione è presente, mandiamo gli oggetti al server
+            await _connection.SendAsync("AddGameObjectOnServer", "ball");
+            await _connection.SendAsync("AddGameObjectOnServer", "player1");
+            await _connection.SendAsync("AddGameObjectOnServer", "player2");
+
+            Thread.Sleep(10000);
+
+            // Ricavo che tipo di player sono(1, 2 o spettatore)
+            playerType = await _connection.InvokeAsync<Enums.ClientType>("GetClientType");
+
+            this.InitializeGameObjects();
+
+            clickOnPageDisabled = false;
+        }
+
+        public void MoveOnAxisAndSignal(UIDragEventArgs e, GameObject go)
+        {
+            if (!go.Draggable)
+            {
+                return;
+            }
+        }
+
+
+        private void InitializeGameObjects()
+        {
+            this.gameObjects = new List<GameObject>()
+            {
+            new GameObject()
+            {
+                Id = "player1",
+                LastUpdatedBy = null,
+                Left = 100,
+                Top = 100,
+                Draggable = playerType == Enums.ClientType.Player1
+            },
+            new GameObject()
+            {
+                Id = "player2",
+                LastUpdatedBy = null,
+                Left = 880,
+                Top = 100,
+                Draggable = playerType == Enums.ClientType.Player2
+            },
+            new GameObject()
+            {
+                Id = "ball",
+                LastUpdatedBy = null,
+                Left = 500,
+                Top = 250
+            }
+        };
+        }
+
+        private Task UpdateGameObjectPositionOnClient(GameObject updatedObj)
+        {
+            for (int i = 0; i < gameObjects.Count; i++)
+            {
+                var gameObject = gameObjects[i];
+                if (gameObject == null || !gameObject.Id.Equals(updatedObj.Id))
+                {
+                    continue;
+                }
+
+                // Altrimenti lo riassegno, ci penserà blazor a ridisegnare l'elemento al prossimo hearthbeat
+                gameObjects[i].Left = updatedObj.Left;
+                gameObjects[i].Top = updatedObj.Top;
+            }
+
+            return Task.CompletedTask;
+        }
     }
-}

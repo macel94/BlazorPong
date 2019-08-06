@@ -10,60 +10,62 @@ namespace BlazorPong.Controllers
 {
     public class ServerGameController
     {
-        private readonly TimeSpan _broadcastInterval;
 
-        private BallController _ballController;
-        private readonly Broadcaster _broadcaster;
-        private List<GameObject> _gameObjects;
-        private Timer _broadcastLoop;
+        public BallController BallController;
+        public List<GameObject> GameObjects;
+        private string Player1ConnectionId;
+        private string Player2ConnectionId;
 
-        public string Player1ConnectionId { get; set; }
-        public string Player2ConnectionId { get; set; }
-
-        public ServerGameController(IHubContext<GameHub, IBlazorPongClient> hubContext)
+        public ServerGameController()
         {
-            _broadcaster = new Broadcaster(hubContext);
-            
-            // We're going to broadcast to all clients a maximum of 25 times per second
-            _broadcastInterval = TimeSpan.FromMilliseconds(40);
-            _gameObjects = new List<GameObject>();
+            GameObjects = new List<GameObject>();
         }
 
-        public void AddGameObject(string id)
+        public string GetPlayer1ConnectionId()
         {
-            if (_gameObjects.All(g => g.Id != id))
+            return this.Player1ConnectionId;
+        }
+
+        public string GetPlayer2ConnectionId()
+        {
+            return this.Player2ConnectionId;
+        }
+
+        public void SetPlayer1ConnectionId(string id)
+        {
+            this.Player1ConnectionId = id;
+        }
+
+        public void SetPlayer2ConnectionId(string id)
+        {
+            this.Player2ConnectionId = id;
+        }
+
+        public void AddGameObjectOnServer(string id, GameHub gameHub)
+        {
+            if (GameObjects.All(g => g.Id != id))
             {
                 var gameObject = new GameObject { Id = id };
-                _gameObjects.Add(gameObject);
+                GameObjects.Add(gameObject);
 
                 if (id == "ball")
-                    _ballController = new BallController(gameObject);
-
-
-                if (_gameObjects.Count == 3)
-                {
-                    // Now that we got both players and the ball, start the broadcast loop, and update all the GameObjects that moved
-                    _broadcastLoop = new Timer(Update,
-                                                null,
-                                                _broadcastInterval,
-                                                _broadcastInterval);
-                }
+                    BallController = new BallController(gameObject);
             }
         }
 
         public void OnPlayer1Hit()
         {
-            _ballController.OnPlayer1Hit();
+            BallController.OnPlayer1Hit();
         }
 
         public void OnPlayer2Hit()
         {
-            _ballController.OnPlayer2Hit();
+            BallController.OnPlayer2Hit();
         }
 
-        public void UpdateGameObjectPosition(GameObject clientModel)
+        public void UpdateGameObjectPositionOnServer(GameObject clientModel)
         {
-            var gameObject = _gameObjects.FirstOrDefault(g => g.Id == clientModel.Id);
+            var gameObject = GameObjects.FirstOrDefault(g => g.Id == clientModel.Id);
 
             if (gameObject != null)
             {
@@ -72,18 +74,6 @@ namespace BlazorPong.Controllers
                 gameObject.LastUpdatedBy = clientModel.LastUpdatedBy;
                 gameObject.Moved = true;
             }
-        }
-
-        public void UpdateGameObjectPositionsForClient(string connectionId)
-        {
-            _broadcaster.Broadcast(_gameObjects.Where(g => g.LastUpdatedBy != null), connectionId);
-        }
-
-        private void Update(object state)
-        {
-            _ballController.Update();
-
-            _broadcaster.Broadcast(_gameObjects.Where(g => g.Moved));
         }
     }
 }

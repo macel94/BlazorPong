@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
+using Newtonsoft.Json;
 
 namespace BlazorPong.Shared
 {
@@ -6,9 +8,11 @@ namespace BlazorPong.Shared
     {
         [JsonProperty("left")]
         public double Left { get; set; }
+        public string LeftPx => this.Left + "px";
 
         [JsonProperty("top")]
         public double Top { get; set; }
+        public string TopPx => this.Top + "px";
 
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -18,5 +22,6 @@ namespace BlazorPong.Shared
 
         [JsonIgnore]
         public bool Moved { get; set; }
+        public bool Draggable { get; set; }
     }
 }
