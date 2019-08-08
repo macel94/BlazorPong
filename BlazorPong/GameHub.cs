@@ -25,7 +25,7 @@ namespace BlazorPong
         // TODO -FBE: Controlla se possibile se si può implementare un bot che gioca contro di te
         public void UpdateGameObjectPosition(GameObject clientGameObject)
         {
-            // Per ora nessaun proprietà deve stare nell'interfaccia
+            // Per ora nessuna proprietà deve stare nell'interfaccia client
             //string playerName = Clients.Caller.PlayerName;
             //Trace.TraceInformation("a player" + " moved to position " + clientGameObject.Top);
             clientGameObject.LastUpdatedBy = Context.ConnectionId;

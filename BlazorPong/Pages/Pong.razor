@@ -1,4 +1,5 @@
 ﻿@page "/pong"
+@using System.Threading
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.SignalR.Client
 
@@ -8,8 +9,8 @@
         width: 20px;
         height: 100px;
         position: absolute;
-        left: @(gameObjects.FirstOrDefault(g => g.Id.Equals("player1"))?.LeftPx ?? "100px");
-        top: @(gameObjects.FirstOrDefault(g => g.Id.Equals("player1"))?.TopPx ?? "100px");
+        left: @(_gameObjects.FirstOrDefault(g => g.Id.Equals("player1"))?.LeftPx ?? "100px");
+        top: @(_gameObjects.FirstOrDefault(g => g.Id.Equals("player1"))?.TopPx ?? "100px");
     }
 
     #player2 {
@@ -17,8 +18,8 @@
         width: 20px;
         height: 100px;
         position: absolute;
-        left: @(gameObjects.FirstOrDefault(g => g.Id.Equals("player2"))?.LeftPx ?? "880px");
-        top: @(gameObjects.FirstOrDefault(g => g.Id.Equals("player2"))?.TopPx ?? "100px");
+        left: @(_gameObjects.FirstOrDefault(g => g.Id.Equals("player2"))?.LeftPx ?? "880px");
+        top: @(_gameObjects.FirstOrDefault(g => g.Id.Equals("player2"))?.TopPx ?? "100px");
     }
 
     #ball {
@@ -26,17 +27,17 @@
         width: 20px;
         height: 20px;
         position: absolute;
-        left: @(gameObjects.FirstOrDefault(g => g.Id.Equals("ball"))?.LeftPx ?? "500px");
-        top: @(gameObjects.FirstOrDefault(g => g.Id.Equals("ball"))?.TopPx ?? "250px");
+        left: @(_gameObjects.FirstOrDefault(g => g.Id.Equals("ball"))?.LeftPx ?? "500px");
+        top: @(_gameObjects.FirstOrDefault(g => g.Id.Equals("ball"))?.TopPx ?? "250px");
     }
 </style>
 
-<div id="message">@message</div>
+<div id="message">@_message</div>
 
 <div id="area">
     <div id="tophorizontalboundary"></div>
     <div id="leftverticalboundary"></div>
-    @foreach (var go in gameObjects)
+    @foreach (var go in _gameObjects)
     {
         // ball, player1 e player2
         <div id="@go.Id" draggable="@go.Draggable" @ondrag="@(e => MoveOnYAxisAndFlag(e, go))"></div>
@@ -46,12 +47,13 @@
 </div>
 
 @code {
-    List<GameObject> gameObjects = new List<GameObject>();
+    List<GameObject> _gameObjects = new List<GameObject>();
     HubConnection _connection;
     // Per non lasciare cliccare nulla fino a che non esiste una connessione reale
-    bool clickOnPageDisabled = true;
-    Enums.ClientType playerType;
-    string message;
+    bool _clickOnPageDisabled = true;
+    Enums.ClientType _playerType;
+    string _message;
+    Timer updateServerTimer;
 
     protected override async Task OnInitAsync()
     {
@@ -63,10 +65,10 @@
             .WithAutomaticReconnect()
             .Build();
 #else
-        _connection = new HubConnectionBuilder()
-            .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
-            .WithAutomaticReconnect()
-            .Build();
+_connection = new HubConnectionBuilder()
+    .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
+    .WithAutomaticReconnect()
+    .Build();
 #endif
 
         _connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
@@ -78,24 +80,28 @@
         await _connection.SendAsync("AddGameObjectOnServer", "player2");
 
         // Ricavo che tipo di player sono(1, 2 o spettatore)
-        playerType = await _connection.InvokeAsync<Enums.ClientType>("GetClientType");
+        _playerType = await _connection.InvokeAsync<Enums.ClientType>("GetClientType");
 
-        switch (playerType)
+        switch (_playerType)
         {
             case Enums.ClientType.Player1:
-                message = "Sei il player1";
+                _message = "Sei il player1";
                 break;
             case Enums.ClientType.Player2:
-                message = "Sei il player2";
+                _message = "Sei il player2";
                 break;
             default:
-                message = "Sei uno spettatore";
+                _message = "Sei uno spettatore";
                 break;
         }
 
         this.InitializeGameObjects();
 
-        clickOnPageDisabled = false;
+        _clickOnPageDisabled = false;
+
+        // Ogni decimo di secondo controlliamo se necessario fare l'update delle collisioni al server e in caso lo mandiamo
+        // Iniziamo un secondo dopo l'inizializzazione del timer
+        updateServerTimer = new Timer(UpdateServer, null, 1000, 100);
     }
 
     //function makeDraggable(gameObject)
@@ -116,75 +122,95 @@
 
     public void MoveOnYAxisAndFlag(UIDragEventArgs e, GameObject go)
     {
-        if (!go.Draggable)
+        if (!go.Draggable || _clickOnPageDisabled)
         {
             return;
         }
 
-        // TODO Aggiungi il check con i pixel costanti di top
-        go.Top = e.ClientY;
+        // TODO Aggiungi la limitazione con i pixel costanti di top e bot, inoltre sottrai e aggiungi rispetto alla tua coordinata per mantenere tutto assoluto
+        go.Top = e.ScreenY;
 
-        //Ignoro l'asse x e quindi il left, che deve rimanere sempre uguale
+        // Ignoro l'asse x e quindi il left, che deve rimanere sempre uguale, e imposto come mosso e quindi da inviare l'oggetto
+        // Di cui si è fatto il drag
         go.Moved = true;
     }
 
-    //function updateServer()
-    //{
-    //// Send any data needed to the server...
+    private async void UpdateServer(object state)
+    {
+        if (_playerType == Enums.ClientType.Spectator)
+        {
+            return;
+        }
 
-    //    if (clientType == ClientTypeEnum.Spectator) // If you're a spectator, you don't update the server
-    //        return;
+        var tempGameObjects = new List<GameObject>();
+        tempGameObjects.AddRange(_gameObjects);
 
-    //    updateGameObjectPositions();
+        await UpdateGameObjectPositions();
 
-    //    playerGameObject = clientType == ClientTypeEnum.Player1
-    //        ? player1GameObject
-    //        : player2GameObject;
+        var playerGameObject = tempGameObjects.FirstOrDefault(go => go.Id.Equals((_playerType == Enums.ClientType.Player1 ? "player1" : "player2")));
 
-    //    checkForCollisionsWithPlayerAndBall(playerGameObject);
-    //}
+        await CheckForCollisionsWithPlayerAndBall(playerGameObject, tempGameObjects);
+    }
 
-    //function checkForCollisionsWithPlayerAndBall(playerGameObject)
-    //{
-    //    if (isCollide(playerGameObject, ballGameObject))
-    //    {
-    //        if (clientType == ClientTypeEnum.Player1)
-    //            pongHub.server.onPlayer1Hit();
-    //        else
-    //            pongHub.server.onPlayer2Hit();
-    //    }
-    //}
+    private async Task CheckForCollisionsWithPlayerAndBall(GameObject playerGameObject, List<GameObject> tempGameObjects)
+    {
+        if (IsCollide(playerGameObject, tempGameObjects.FirstOrDefault(go => go.Id.Equals("ball"))))
+        {
+            if (_playerType == Enums.ClientType.Player1)
+            {
+                await _connection.SendAsync("OnPlayer1Hit");
+            }
+            else
+            {
+                await _connection.SendAsync("OnPlayer2Hit");
+            }
+        }
+    }
 
-    //function isCollide(gameObjectA, gameObjectB)
-    //{
-    //    var aLeft = gameObjectA.left,
-    //        aTop = gameObjectA.top,
-    //        aWidth = gameObjectA.width,
-    //        aHeight = gameObjectA.height,
-    //        bLeft = gameObjectB.left,
-    //        bTop = gameObjectB.top,
-    //        bWidth = gameObjectB.width,
-    //        bHeight = gameObjectB.height;
+    private bool IsCollide(GameObject gameObjectA, GameObject gameObjectB)
+    {
+        var aLeft = gameObjectA.Left;
+        var aTop = gameObjectA.Top;
+        var aWidth = gameObjectA.Width;
+        var aHeight = gameObjectA.Height;
+        var bLeft = gameObjectB.Left;
+        var bTop = gameObjectB.Top;
+        var bWidth = gameObjectB.Width;
+        var bHeight = gameObjectB.Height;
 
-    //    return !(
-    //        ((aTop + aHeight) < (bTop)) ||
-    //        (aTop > (bTop + bHeight)) ||
-    //        ((aLeft + aWidth) < bLeft) ||
-    //        (aLeft > (bLeft + bWidth))
-    //        );
-    //}
+        return !(
+            ((aTop + aHeight) < (bTop)) ||
+            (aTop > (bTop + bHeight)) ||
+            ((aLeft + aWidth) < bLeft) ||
+            (aLeft > (bLeft + bWidth))
+            );
+    }
+
+    private async Task UpdateGameObjectPositions()
+    {
+        foreach (var go in _gameObjects)
+        {
+            if (go.Moved)
+            {
+                await _connection.SendAsync("UpdateGameObjectPosition", go);
+                go.Moved = false;
+            }
+        }
+    }
 
     private void InitializeGameObjects()
     {
-        this.gameObjects = new List<GameObject>()
-        {
+        this._gameObjects = new List<GameObject>()
+{
             new GameObject()
             {
                 Id = "player1",
                 LastUpdatedBy = null,
                 Left = 100,
                 Top = 100,
-                Draggable = playerType == Enums.ClientType.Player1
+                Draggable = _playerType == Enums.ClientType.Player1,
+                Width = 20,
+                Height = 100
             },
             new GameObject()
             {
@@ -192,30 +218,35 @@
                 LastUpdatedBy = null,
                 Left = 880,
                 Top = 100,
-                Draggable = playerType == Enums.ClientType.Player2
+                Draggable = _playerType == Enums.ClientType.Player2,
+                Width = 20,
+                Height = 100
             },
             new GameObject()
             {
                 Id = "ball",
                 LastUpdatedBy = null,
                 Left = 500,
-                Top = 250
+                Top = 250,
+                Width = 20,
+                Height = 20
             }
         };
     }
 
     private Task UpdateGameObjectPositionOnClient(GameObject updatedObj)
     {
-        for (int i = 0; i < gameObjects.Count; i++)
+        for (int i = 0; i < _gameObjects.Count; i++)
         {
-            var gameObject = gameObjects[i];
-            if (gameObject == null || !gameObject.Id.Equals(updatedObj.Id))
+            var gameObject = _gameObjects[i];
+            if (_gameObjects[i] == null || !gameObject.Id.Equals(updatedObj.Id))
             {
                 continue;
             }
 
             // Altrimenti lo riassegno, ci penserà blazor a ridisegnare l'elemento al prossimo hearthbeat
-            gameObjects[i] = updatedObj;
+            _gameObjects[i].Top = updatedObj.Top;
+            _gameObjects[i].Left = updatedObj.Left;
         }
 
         // Se siamo qui devo renderizzare di nuovo la UI, anche se non c'è stata interazione da parte del client
