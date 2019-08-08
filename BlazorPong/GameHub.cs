@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using BlazorPong.Controllers;
 using BlazorPong.Interfaces;
@@ -11,12 +9,12 @@ namespace BlazorPong
 {
     public class GameHub : Hub<IBlazorPongClient>
     {
-        //ILogger<GameHub> _logger;
         private readonly ServerGameController _gameController;
 
+        // Tramite DI
         public GameHub(ServerGameController sgc)
         {
-            _gameController = sgc;//GlobalContext.GlobalServerGameController;
+            _gameController = sgc;
         }
 
         public void AddGameObjectOnServer(string id)

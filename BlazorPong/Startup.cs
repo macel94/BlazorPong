@@ -12,7 +12,6 @@ namespace BlazorPong
 {
     public class Startup
     {
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -27,7 +26,6 @@ namespace BlazorPong
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddTransient<HubConnectionBuilder>();
-            //services.AddTransient<GameHub>();
             services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<ServerGameController>();
             services.AddSignalR();

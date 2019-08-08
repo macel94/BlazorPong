@@ -8,11 +8,11 @@ namespace BlazorPong.Shared
     {
         [JsonProperty("left")]
         public double Left { get; set; }
-        public string LeftPx => this.Left + "px";
+        public string LeftPx => $"{(int)this.Left}px";
 
         [JsonProperty("top")]
         public double Top { get; set; }
-        public string TopPx => this.Top + "px";
+        public string TopPx => $"{(int)this.Top}px";
 
         [JsonProperty("id")]
         public string Id { get; set; }

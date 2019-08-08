@@ -63,15 +63,15 @@ namespace BlazorPong.Controllers
             BallController.OnPlayer2Hit();
         }
 
-        public void UpdateGameObjectPositionOnServer(GameObject clientModel)
+        public void UpdateGameObjectPositionOnServer(GameObject clientUpdatedObject)
         {
-            var gameObject = GameObjects.FirstOrDefault(g => g.Id == clientModel.Id);
+            var gameObject = GameObjects.FirstOrDefault(g => g.Id == clientUpdatedObject.Id);
 
             if (gameObject != null)
             {
-                gameObject.Left = clientModel.Left;
-                gameObject.Top = clientModel.Top;
-                gameObject.LastUpdatedBy = clientModel.LastUpdatedBy;
+                gameObject.Left = clientUpdatedObject.Left;
+                gameObject.Top = clientUpdatedObject.Top;
+                gameObject.LastUpdatedBy = clientUpdatedObject.LastUpdatedBy;
                 gameObject.Moved = true;
             }
         }

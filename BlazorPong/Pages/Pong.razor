@@ -1,5 +1,4 @@
 ﻿@page "/pong"
-@using System.Threading
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.SignalR.Client
 
@@ -30,80 +29,155 @@
         left: @(gameObjects.FirstOrDefault(g => g.Id.Equals("ball"))?.LeftPx ?? "500px");
         top: @(gameObjects.FirstOrDefault(g => g.Id.Equals("ball"))?.TopPx ?? "250px");
     }
-
-    .drg {
-
-    }
 </style>
+
+<div id="message">@message</div>
+
 <div id="area">
+    <div id="tophorizontalboundary"></div>
+    <div id="leftverticalboundary"></div>
     @foreach (var go in gameObjects)
     {
         // ball, player1 e player2
-        <div id="@go.Id" draggable="@go.Draggable" @ondrag="@(e => MoveOnAxisAndSignal(e, go))" ></div>
+        <div id="@go.Id" draggable="@go.Draggable" @ondrag="@(e => MoveOnYAxisAndFlag(e, go))"></div>
     }
-    <div id="tophorizontalboundary"></div>
-        <div id="bottomhorizontalboundary"></div>
-        <div id="leftverticalboundary"></div>
-        <div id="rightverticalboundary"></div>
-    </div>
+    <div id="bottomhorizontalboundary"></div>
+    <div id="rightverticalboundary"></div>
+</div>
 
-    <div id="message">@message</div>
+@code {
+    List<GameObject> gameObjects = new List<GameObject>();
+    HubConnection _connection;
+    // Per non lasciare cliccare nulla fino a che non esiste una connessione reale
+    bool clickOnPageDisabled = true;
+    Enums.ClientType playerType;
+    string message;
 
-    @code {
-        List<GameObject> gameObjects = new List<GameObject>();
-        HubConnection _connection;
-        // Per non lasciare cliccare nulla fino a che non esiste una connessione reale
-        bool clickOnPageDisabled = true;
-        Enums.ClientType playerType;
-        string message;
-
-        protected override async Task OnInitAsync()
-        {
-            // 44364 DEVELOPMENT(IIS)
-            // 443 PROD o DEV BlazorPong
+    protected override async Task OnInitAsync()
+    {
+        // 44364 DEVELOPMENT(IIS)
+        // 443 PROD o DEV BlazorPong
 #if DEBUG
-            _connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost/gamehub")
-                .WithAutomaticReconnect()
-                .Build();
+        _connection = new HubConnectionBuilder()
+            .WithUrl("https://localhost/gamehub")
+            .WithAutomaticReconnect()
+            .Build();
 #else
-    _connection = new HubConnectionBuilder()
-        .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
-        .WithAutomaticReconnect()
-        .Build();
+        _connection = new HubConnectionBuilder()
+            .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
+            .WithAutomaticReconnect()
+            .Build();
 #endif
 
-            _connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
-            await _connection.StartAsync();
+        _connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
+        await _connection.StartAsync();
 
-            // Ora che la connessione è presente, mandiamo gli oggetti al server
-            await _connection.SendAsync("AddGameObjectOnServer", "ball");
-            await _connection.SendAsync("AddGameObjectOnServer", "player1");
-            await _connection.SendAsync("AddGameObjectOnServer", "player2");
+        // Ora che la connessione è presente, mandiamo gli oggetti al server
+        await _connection.SendAsync("AddGameObjectOnServer", "ball");
+        await _connection.SendAsync("AddGameObjectOnServer", "player1");
+        await _connection.SendAsync("AddGameObjectOnServer", "player2");
 
-            Thread.Sleep(10000);
+        // Ricavo che tipo di player sono(1, 2 o spettatore)
+        playerType = await _connection.InvokeAsync<Enums.ClientType>("GetClientType");
 
-            // Ricavo che tipo di player sono(1, 2 o spettatore)
-            playerType = await _connection.InvokeAsync<Enums.ClientType>("GetClientType");
-
-            this.InitializeGameObjects();
-
-            clickOnPageDisabled = false;
+        switch (playerType)
+        {
+            case Enums.ClientType.Player1:
+                message = "Sei il player1";
+                break;
+            case Enums.ClientType.Player2:
+                message = "Sei il player2";
+                break;
+            default:
+                message = "Sei uno spettatore";
+                break;
         }
 
-        public void MoveOnAxisAndSignal(UIDragEventArgs e, GameObject go)
+        this.InitializeGameObjects();
+
+        clickOnPageDisabled = false;
+    }
+
+    //function makeDraggable(gameObject)
+    //{
+    //    gameObject.element.draggable(
+    //    {
+    //        axis: "y",
+    //        containment: 'parent',
+    //        drag: function ()
+    //        {
+    //            gameObject.left = gameObject.element.offset().left;
+    //            gameObject.top = gameObject.element.offset().top;
+
+    //            gameObject.moved = true;
+    //        }
+    //    });
+    //}
+
+    public void MoveOnYAxisAndFlag(UIDragEventArgs e, GameObject go)
+    {
+        if (!go.Draggable)
         {
-            if (!go.Draggable)
-            {
-                return;
-            }
+            return;
         }
 
+        // TODO Aggiungi il check con i pixel costanti di top
+        go.Top = e.ClientY;
 
-        private void InitializeGameObjects()
+        //Ignoro l'asse x e quindi il left, che deve rimanere sempre uguale
+        go.Moved = true;
+    }
+
+    //function updateServer()
+    //{
+    //// Send any data needed to the server...
+
+    //    if (clientType == ClientTypeEnum.Spectator) // If you're a spectator, you don't update the server
+    //        return;
+
+    //    updateGameObjectPositions();
+
+    //    playerGameObject = clientType == ClientTypeEnum.Player1
+    //        ? player1GameObject
+    //        : player2GameObject;
+
+    //    checkForCollisionsWithPlayerAndBall(playerGameObject);
+    //}
+
+    //function checkForCollisionsWithPlayerAndBall(playerGameObject)
+    //{
+    //    if (isCollide(playerGameObject, ballGameObject))
+    //    {
+    //        if (clientType == ClientTypeEnum.Player1)
+    //            pongHub.server.onPlayer1Hit();
+    //        else
+    //            pongHub.server.onPlayer2Hit();
+    //    }
+    //}
+
+    //function isCollide(gameObjectA, gameObjectB)
+    //{
+    //    var aLeft = gameObjectA.left,
+    //        aTop = gameObjectA.top,
+    //        aWidth = gameObjectA.width,
+    //        aHeight = gameObjectA.height,
+    //        bLeft = gameObjectB.left,
+    //        bTop = gameObjectB.top,
+    //        bWidth = gameObjectB.width,
+    //        bHeight = gameObjectB.height;
+
+    //    return !(
+    //        ((aTop + aHeight) < (bTop)) ||
+    //        (aTop > (bTop + bHeight)) ||
+    //        ((aLeft + aWidth) < bLeft) ||
+    //        (aLeft > (bLeft + bWidth))
+    //        );
+    //}
+
+    private void InitializeGameObjects()
+    {
+        this.gameObjects = new List<GameObject>()
         {
-            this.gameObjects = new List<GameObject>()
-            {
             new GameObject()
             {
                 Id = "player1",
@@ -128,23 +202,25 @@
                 Top = 250
             }
         };
-        }
+    }
 
-        private Task UpdateGameObjectPositionOnClient(GameObject updatedObj)
+    private Task UpdateGameObjectPositionOnClient(GameObject updatedObj)
+    {
+        for (int i = 0; i < gameObjects.Count; i++)
         {
-            for (int i = 0; i < gameObjects.Count; i++)
+            var gameObject = gameObjects[i];
+            if (gameObject == null || !gameObject.Id.Equals(updatedObj.Id))
             {
-                var gameObject = gameObjects[i];
-                if (gameObject == null || !gameObject.Id.Equals(updatedObj.Id))
-                {
-                    continue;
-                }
-
-                // Altrimenti lo riassegno, ci penserà blazor a ridisegnare l'elemento al prossimo hearthbeat
-                gameObjects[i].Left = updatedObj.Left;
-                gameObjects[i].Top = updatedObj.Top;
+                continue;
             }
 
-            return Task.CompletedTask;
+            // Altrimenti lo riassegno, ci penserà blazor a ridisegnare l'elemento al prossimo hearthbeat
+            gameObjects[i] = updatedObj;
         }
+
+        // Se siamo qui devo renderizzare di nuovo la UI, anche se non c'è stata interazione da parte del client
+        this.StateHasChanged();
+
+        return Task.CompletedTask;
     }
+}
