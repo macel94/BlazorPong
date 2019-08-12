@@ -31,7 +31,7 @@ namespace BlazorPong.Shared
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (_hubContext != null && _gameController.GameObjects.Count == 3)
+                if (_hubContext != null && _gameController.GameObjects.Count == 3 && _gameController.MustPlayGame())
                 {
                     // Faccio sempre muovere la palla
                     _gameController.BallController.Update();

@@ -21,6 +21,11 @@ namespace BlazorPong.Controllers
             GameObjects = new List<GameObject>();
         }
 
+        public bool MustPlayGame()
+        {
+            return this.Player1ConnectionId != null && this.Player2ConnectionId != null;
+        }
+
         public string GetPlayer1ConnectionId()
         {
             return this.Player1ConnectionId;
