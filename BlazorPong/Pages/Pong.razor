@@ -52,6 +52,7 @@
     // Per non lasciare cliccare nulla fino a che non esiste una connessione reale
     bool _clickOnPageDisabled = true;
     Enums.ClientType _playerType;
+    double mouseOffset = 0;
     string _message;
     Timer updateServerTimer;
 
@@ -127,12 +128,30 @@ _connection = new HubConnectionBuilder()
             return;
         }
 
-        // TODO Aggiungi la limitazione con i pixel costanti di top e bot, inoltre sottrai e aggiungi rispetto alla tua coordinata per mantenere tutto assoluto
-        go.Top = e.ScreenY;
+        // Calcolo prima di tutto l'offset del mouse se necessario
+        if ((int)mouseOffset == 0)
+        {
+            mouseOffset = e.ClientY - go.Top;
+        }
+
+        // Non devo considerare l'offset nel calcolo
+        go.Top = e.ClientY - mouseOffset;
+
+        // Il top può andare da un minimo di 10 a un massimo di 400(500 - altezza player)
+        if(go.Top < 10)
+        {
+            go.Top = 10;
+        }else if (go.Top > 400)
+        {
+            go.Top = 400;
+        }
 
         // Ignoro l'asse x e quindi il left, che deve rimanere sempre uguale, e imposto come mosso e quindi da inviare l'oggetto
         // Di cui si è fatto il drag
         go.Moved = true;
+
+        // Infine annullo l'evento di drag che altrimenti causa lo spostamento in punti indesiderati
+        e.DataTransfer.DropEffect = "move";
     }
 
     private async void UpdateServer(object state)

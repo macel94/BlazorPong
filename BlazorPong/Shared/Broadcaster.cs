@@ -38,8 +38,16 @@ namespace BlazorPong.Shared
 
                     foreach (var gameObject in _gameController.GameObjects.Where(g => g.Moved))
                     {
-                        // Qui si richiama su ogni client l'evento UpdateGameObjectPositionOnServer, che poi a sua volta richiamerà il metodo lato server
-                        await _hubContext.Clients.All.UpdateGameObjectPositionOnClient(gameObject);
+                        // Se so chi ha fatto l'update evito di mandarglielo
+                        if (gameObject.LastUpdatedBy != null)
+                        {
+                            await _hubContext.Clients.AllExcept(gameObject.LastUpdatedBy).UpdateGameObjectPositionOnClient(gameObject);
+                        }
+                        else
+                        {
+                            await _hubContext.Clients.All.UpdateGameObjectPositionOnClient(gameObject);
+                        }
+
                         gameObject.Moved = false;
                     }
                 }
