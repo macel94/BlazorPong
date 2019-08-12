@@ -10,3 +10,6 @@ Build status: [![Build Status](https://francesco-belacca.visualstudio.com/Blazor
 Devops integrated, deployed as self-contained, 32 bit because i chose the free tier plan.
 
 Using SignalR 
+
+# Website
+https://blazorpong-dev-as.azurewebsites.net/pong
