@@ -119,21 +119,28 @@
         }
 
         // Non devo considerare l'offset nel calcolo
-        go.Top = e.ClientY - _mouseOffset;
+        var nextTop = e.ClientY - _mouseOffset;
 
         // Il top può andare da un minimo di 10 a un massimo di 400(500 - altezza player)
-        if (go.Top < 10)
+        if (nextTop < 0)
         {
-            go.Top = 10;
+            return;
         }
-        else if (go.Top > 400)
+        if (nextTop < 10)
         {
-            go.Top = 400;
+            nextTop = 10;
+        }
+        else if (nextTop > 400)
+        {
+            nextTop = 400;
         }
 
         // Ignoro l'asse x e quindi il left, che deve rimanere sempre uguale, e imposto come mosso e quindi da inviare l'oggetto
         // Di cui si è fatto il drag
+        go.Top = nextTop;
         go.Moved = true;
+
+        Console.Out.WriteLine(go.Top);
     }
 
     private async void UpdateServer(object state)
