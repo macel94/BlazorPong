@@ -2,6 +2,8 @@
 @using System.Threading
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.SignalR.Client
+@implements IDisposable
+@inject IJSRuntime JsRuntime;
 
 <style>
     #player1 {
@@ -56,8 +58,10 @@
     string _message;
     Timer _updateServerTimer;
 
-    protected override async Task OnInitAsync()
+    protected override async Task OnInitializedAsync()
     {
+        await this.SetOnbeforeunload();
+
         // 44364 DEVELOPMENT(IIS)
         // 443 PROD o DEV BlazorPong
 #if DEBUG
@@ -66,19 +70,14 @@
             .WithAutomaticReconnect()
             .Build();
 #else
-        _connection = new HubConnectionBuilder()
-            .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
-            .WithAutomaticReconnect()
-            .Build();
+_connection = new HubConnectionBuilder()
+    .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
+    .WithAutomaticReconnect()
+    .Build();
 #endif
 
         _connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
         await _connection.StartAsync();
-
-        // Ora che la connessione è presente, mandiamo gli oggetti al server
-        await _connection.SendAsync("AddGameObjectOnServer", "ball");
-        await _connection.SendAsync("AddGameObjectOnServer", "player1");
-        await _connection.SendAsync("AddGameObjectOnServer", "player2");
 
         // Ricavo che tipo di player sono(1, 2 o spettatore)
         _playerType = await _connection.InvokeAsync<Enums.ClientType>("GetClientType");
@@ -96,6 +95,7 @@
                 break;
         }
 
+        // Richiama
         this.InitializeGameObjects();
 
         _clickOnPageDisabled = false;
@@ -207,40 +207,52 @@
         }
     }
 
-    private void InitializeGameObjects()
+    private async void InitializeGameObjects()
     {
-        this._gameObjects = new List<GameObject>()
-{
-            new GameObject()
+        if (_playerType != Enums.ClientType.Spectator)
+        {
+            this._gameObjects = new List<GameObject>()
             {
-                Id = "player1",
-                LastUpdatedBy = null,
-                Left = 100,
-                Top = 100,
-                Draggable = _playerType == Enums.ClientType.Player1,
-                Width = 20,
-                Height = 100
-            },
-            new GameObject()
-            {
-                Id = "player2",
-                LastUpdatedBy = null,
-                Left = 880,
-                Top = 100,
-                Draggable = _playerType == Enums.ClientType.Player2,
-                Width = 20,
-                Height = 100
-            },
-            new GameObject()
-            {
-                Id = "ball",
-                LastUpdatedBy = null,
-                Left = 500,
-                Top = 250,
-                Width = 20,
-                Height = 20
-            }
-        };
+                new GameObject()
+                {
+                    Id = "player1",
+                    LastUpdatedBy = null,
+                    Left = 100,
+                    Top = 100,
+                    Draggable = _playerType == Enums.ClientType.Player1,
+                    Width = 20,
+                    Height = 100
+                },
+                new GameObject()
+                {
+                    Id = "player2",
+                    LastUpdatedBy = null,
+                    Left = 880,
+                    Top = 100,
+                    Draggable = _playerType == Enums.ClientType.Player2,
+                    Width = 20,
+                    Height = 100
+                },
+                new GameObject()
+                {
+                    Id = "ball",
+                    LastUpdatedBy = null,
+                    Left = 500,
+                    Top = 250,
+                    Width = 20,
+                    Height = 20
+                }
+            };
+
+            // Ora che la connessione è presente, mandiamo gli oggetti al server
+            await _connection.SendAsync("AddMissingGameObjects", this._gameObjects);
+
+        }
+        else
+        {
+            // Altrimenti chiedo al server la posizione di ogni oggetto e aspetto la risposta
+            this._gameObjects = await _connection.InvokeAsync<List<GameObject>>("GetGameObjects");
+        }
     }
 
     /// <summary>
@@ -264,6 +276,48 @@
         // Se siamo qui devo renderizzare di nuovo la UI, anche se non c'è stata interazione da parte del client
         this.StateHasChanged();
 
+        return Task.CompletedTask;
+    }
+
+    public async void Dispose()
+    {
+        // Dispose del timer
+        _updateServerTimer?.Dispose();
+
+        // Chiusura della connessione manualmente perchè l'evento non viene chiamato dal framework
+        if (_connection != null)
+        {
+            await _connection.StopAsync();
+        }
+
+        try
+        {
+            await this.UnsetOnbeforeunload();
+        }
+        catch
+        {
+            //Catch silente, perchè se l'utente si disconnette e non cambia semplicemente tab, l'evento non esiste già più.
+        }
+    }
+
+    private async Task SetOnbeforeunload()
+    {
+        await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.setOnbeforeunload", DotNetObjectRef.Create(this));
+    }
+
+    private async Task UnsetOnbeforeunload()
+    {
+        await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.unsetOnbeforeunload", DotNetObjectRef.Create(this));
+    }
+
+    /// <summary>
+    /// Metodo invocato con cui forzo il dispose in fase di chiusura dell'applicazione
+    /// </summary>
+    /// <returns></returns>
+    [JSInvokable]
+    public Task DisposePongComponent()
+    {
+        Dispose();
         return Task.CompletedTask;
     }
 

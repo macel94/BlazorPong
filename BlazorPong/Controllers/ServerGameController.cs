@@ -46,15 +46,17 @@ namespace BlazorPong.Controllers
             this.Player2ConnectionId = id;
         }
 
-        public void AddGameObjectOnServer(string id, GameHub gameHub)
+        public void AddMissingGameObjectsOnServer(List<GameObject> clientGameObjects, GameHub gameHub)
         {
-            if (GameObjects.All(g => g.Id != id))
+            foreach (var clientGameObject in clientGameObjects)
             {
-                var gameObject = new GameObject { Id = id };
-                GameObjects.Add(gameObject);
+                if (GameObjects.All(g => g.Id != clientGameObject.Id))
+                {
+                    GameObjects.Add(clientGameObject);
 
-                if (id == "ball")
-                    BallController = new BallController(gameObject);
+                    if (clientGameObject.Id == "ball")
+                        BallController = new BallController(clientGameObject);
+                }
             }
         }
 

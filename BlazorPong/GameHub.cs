@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BlazorPong.Controllers;
 using BlazorPong.Interfaces;
@@ -17,9 +18,9 @@ namespace BlazorPong
             _gameController = sgc;
         }
 
-        public void AddGameObjectOnServer(string id)
+        public void AddMissingGameObjects(List<GameObject> clientGameObjects)
         {
-            _gameController.AddGameObjectOnServer(id, this);
+            _gameController.AddMissingGameObjectsOnServer(clientGameObjects, this);
         }
 
         // TODO -FBE: Controlla se possibile se si può implementare un bot che gioca contro di te
@@ -51,6 +52,11 @@ namespace BlazorPong
         public void OnPlayer2Hit()
         {
             _gameController.OnPlayer2Hit();
+        }
+
+        public List<GameObject> GetGameObjects()
+        {
+            return _gameController.GameObjects;
         }
 
         public override async Task OnConnectedAsync()
