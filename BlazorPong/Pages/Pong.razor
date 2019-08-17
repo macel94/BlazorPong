@@ -1,6 +1,7 @@
 ﻿@page "/pong"
 @using System.Threading
 @using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Http.Connections
 @using Microsoft.AspNetCore.SignalR.Client
 @implements IDisposable
 @inject IJSRuntime JsRuntime;
@@ -45,16 +46,37 @@
 <h2 id="message">@_playerTypeMessage</h2>
 
 <div class="row">
-    <div class="col makeRed">Player 1: @_player1Points</div>
-    @if (_gameMessage != null)
+    @if (_connection == null || (_connection.State != HubConnectionState.Connected && _connection.State != HubConnectionState.Reconnecting))
     {
-        <div class="col">@_gameMessage</div>
+        <h4>@_connectionMessage</h4>
+        <div class="form-row align-items-center">
+            <div class="col-auto my-1">
+                <label class="mr-sm-2 sr-only" for="inlineFormCustomSelect">Connection Type</label>
+                <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" @onchange=@SaveChoice>
+                    @foreach (var connectionType in _connectionTypesDictionary.Keys)
+                    {
+                        <option value=@connectionType>@connectionType</option>
+                    }
+                </select>
+            </div>
+            <div class="col-auto my-1">
+                <button type="button" @onclick="@ConnectToHub" class="btn btn-primary">Connect</button>
+            </div>
+        </div>
     }
-    @if (_playerType != Enums.ClientType.Spectator && _gameMessage == null)
+    else
     {
-        <button type="button" @onclick="@SetPlayerIsReady" class="btn btn-success col">Play</button>
+        <div class="col makeRed">Player 1: @_player1Points</div>
+        @if (_gameMessage != null)
+        {
+            <div class="col">@_gameMessage</div>
+        }
+        @if (_playerType != Enums.ClientType.Spectator && _gameMessage == null)
+        {
+            <button type="button" @onclick="@SetPlayerIsReady" class="btn btn-success col">Play</button>
+        }
+        <div class="col makeGreen">Player 2: @_player2Points</div>
     }
-    <div class="col makeGreen">Player 2: @_player2Points</div>
 </div>
 
 
@@ -74,36 +96,57 @@
 @code {
     List<GameObject> _gameObjects = new List<GameObject>();
     HubConnection _connection;
+    Dictionary<string, HttpTransportType> _connectionTypesDictionary;
     Enums.ClientType _playerType;
     double _mouseOffset = 0;
     int _player1Points;
     int _player2Points;
     string _playerTypeMessage;
     string _gameMessage;
+    string _connectionMessage;
     Timer _updateServerTimer;
+    private HttpTransportType _connectionTypeChoice;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
+    {
+        _connectionMessage = "Please select a type of connection and click 'Connect'.";
+        _connectionTypesDictionary = new Dictionary<string, HttpTransportType>()
+    {
+            {
+                "WebSockets", HttpTransportType.WebSockets
+            },
+            {
+                "LongPolling", HttpTransportType.LongPolling
+            },
+            {
+                "ServerSentEvents", HttpTransportType.ServerSentEvents
+            },
+        };
+        _connectionTypeChoice = HttpTransportType.WebSockets;
+    }
+
+    private async Task ConnectToHub()
     {
         await this.SetOnbeforeunload();
 
-        // 44364 DEVELOPMENT(IIS)
-        // 443 PROD o DEV BlazorPong
 #if DEBUG
+        // 44364 DEVELOPMENT(IIS)
+        // 443 PROD o DEV BlazorPong Env(Forced Https)
         _connection = new HubConnectionBuilder()
-            .WithUrl("https://localhost/gamehub")
+            .WithUrl("https://localhost/gamehub", _connectionTypeChoice)
             .WithAutomaticReconnect()
             .Build();
 #else
-        _connection = new HubConnectionBuilder()
-            .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
-            .WithAutomaticReconnect()
-            .Build();
+    _connection = new HubConnectionBuilder()
+        .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub", _connectionTypeChoice)
+        .WithAutomaticReconnect()
+        .Build();
 #endif
 
         _connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
         _connection.On<Enums.ClientType, int>("UpdatePlayerPoints", this.UpdatePlayerPoints);
         _connection.On<string>("UpdateGameMessage", this.UpdateGameMessage);
-        
+
         await _connection.StartAsync();
 
         // Ricavo che tipo di player sono(1, 2 o spettatore)
@@ -133,10 +176,10 @@
     {
         _gameMessage = serverMessage;
         StateHasChanged();
-        
+
         // Lascio che l'utente veda il messaggio finale
         await Task.Delay(10000);
-        
+
         // Lo resetto a null per mostrare il pulsante play
         _gameMessage = null;
 
@@ -212,7 +255,10 @@
 
         var playerGameObject = tempGameObjects.FirstOrDefault(go => go.Id.Equals((_playerType == Enums.ClientType.Player1 ? "player1" : "player2")));
 
-        await CheckForCollisionsWithPlayerAndBall(playerGameObject, tempGameObjects);
+        if (playerGameObject != null)
+        {
+            await CheckForCollisionsWithPlayerAndBall(playerGameObject, tempGameObjects);
+        }
     }
 
     private async Task CheckForCollisionsWithPlayerAndBall(GameObject playerGameObject, List<GameObject> tempGameObjects)
@@ -242,10 +288,10 @@
         var bHeight = gameObjectB.Height;
 
         return !(
-            aTop + aHeight < bTop ||
-            aTop > bTop + bHeight ||
-            aLeft + aWidth < bLeft ||
-            aLeft > bLeft + bWidth
+            aTop + aHeight <= bTop ||
+            aTop >= bTop + bHeight ||
+            aLeft + aWidth <= bLeft ||
+            aLeft >= bLeft + bWidth
         );
     }
 
@@ -359,6 +405,8 @@
         StateHasChanged();
     }
 
-    // TODO Implementa logica per scelta del tipo di connessione
-    // TODO Implementa logica per scegliere di quanto ci si può muovere e i punti che si fanno e si ricevono di conseguenza
+    private void SaveChoice(UIChangeEventArgs e)
+    {
+        _connectionTypeChoice = _connectionTypesDictionary[e.Value.ToString()];
+    }
 }

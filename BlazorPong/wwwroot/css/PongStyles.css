@@ -1,34 +1,34 @@
 ﻿#area {
     width: 1000px;
     height: 500px;
-    background-color: hotpink;
+    background-color: black;
     position: absolute;
 }
 
 #leftverticalboundary {
-    background-color: black;
+    background-color: deepskyblue;
     width: 10px;
     height: 500px;
     position: absolute;
 }
 
 #rightverticalboundary {
-    background-color: black;
+    background-color: deepskyblue;
     width: 10px;
-    height: 500px;
+    height: 510px;
     left: 1000px;
     position: absolute;
 }
 
 #tophorizontalboundary {
-    background-color: black;
+    background-color: deepskyblue;
     width: 1000px;
     height: 10px;
     position: absolute;
 }
 
 #bottomhorizontalboundary {
-    background-color: black;
+    background-color: deepskyblue;
     width: 1000px;
     height: 10px;
     top: 500px;
