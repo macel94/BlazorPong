@@ -31,16 +31,39 @@ namespace BlazorPong.Controllers
 
             _gameObject = ballGameObject;
             _speed = 8f;
-            _angle = 45;
+            var random = new Random(DateTime.Now.Millisecond);
+            var next = random.Next(1, 5);
+            switch (next)
+            {
+                case 1:
+                    _angle = 45;
+                    break;
+                case 2:
+                    _angle = 135;
+                    break;
+                case 3:
+                    _angle = 225;
+                    break;
+                case 4:
+                    _angle = 315;
+                    break;
+            }
         }
 
-        private void HandleWallCollision()
+        /// <summary>
+        /// Se è punto ritorna chi lo ha fatto
+        /// </summary>
+        /// <returns></returns>
+        private string HandleWallCollision()
         {
-            if (_gameObject.Left <= LeftBounds ||
-                _gameObject.Left >= RightBounds)
+            if (_gameObject.Left <= LeftBounds)
             {
-                _lastCollisionItem = CollisionItem.Wall;
-                HandleVerticalWallCollision();
+                return "player2";
+            }
+
+            if (_gameObject.Left >= RightBounds)
+            {
+                return "player1";
             }
 
             if (_gameObject.Top <= BottomBounds ||
@@ -49,6 +72,8 @@ namespace BlazorPong.Controllers
                 _lastCollisionItem = CollisionItem.Wall;
                 HandleHorizontalWallCollision();
             }
+
+            return null;
         }
 
         private void HandleVerticalWallCollision()
@@ -73,14 +98,15 @@ namespace BlazorPong.Controllers
             }
         }
 
-        public void Update()
+        public string Update()
         {
             _gameObject.Left += Math.Cos(_angle * DegreeToRadians) * _speed;
             _gameObject.Top += Math.Sin(_angle * DegreeToRadians) * _speed;
 
             _gameObject.Moved = true;
-
-            HandleWallCollision();
+            
+            // Se qualcuno ha fatto punto la pallina va resettata
+            return HandleWallCollision();
         }
 
         public void OnPlayer1Hit()

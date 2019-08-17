@@ -18,11 +18,6 @@ namespace BlazorPong
             _gameController = sgc;
         }
 
-        public void AddMissingGameObjects(List<GameObject> clientGameObjects)
-        {
-            _gameController.AddMissingGameObjectsOnServer(clientGameObjects, this);
-        }
-
         // TODO -FBE: Controlla se possibile se si può implementare un bot che gioca contro di te
         public void UpdateGameObjectPosition(GameObject clientGameObject)
         {
@@ -54,8 +49,26 @@ namespace BlazorPong
             _gameController.OnPlayer2Hit();
         }
 
+        public void SetPlayerIsReady()
+        {
+            if (_gameController.GetPlayer1ConnectionId() == Context.ConnectionId)
+            {
+                _gameController.SetPlayer1IsReady(true);
+            }
+            else if (_gameController.GetPlayer2ConnectionId() == Context.ConnectionId)
+            {
+                _gameController.SetPlayer2IsReady(true);
+            }
+        }
+
         public List<GameObject> GetGameObjects()
         {
+            if (_gameController.GameObjects == null || _gameController.GameObjects.Count != 3)
+            {
+                // Aggiungo solo i mancanti se sono qui
+                _gameController.InitializeGameObjectsOnServer(false);
+            }
+
             return _gameController.GameObjects;
         }
 

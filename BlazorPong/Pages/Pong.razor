@@ -32,9 +32,32 @@
         left: @(_gameObjects.FirstOrDefault(g => g.Id.Equals("ball"))?.LeftPx ?? "500px");
         top: @(_gameObjects.FirstOrDefault(g => g.Id.Equals("ball"))?.TopPx ?? "250px");
     }
+
+    .makeRed {
+        color: red
+    }
+
+    .makeGreen {
+        color: green
+    }
 </style>
 
-<div id="message">@_message</div>
+<h2 id="message">@_playerTypeMessage</h2>
+
+<div class="row">
+    <div class="col makeRed">Player 1: @_player1Points</div>
+    @if (_gameMessage != null)
+    {
+        <div class="col">@_gameMessage</div>
+    }
+    @if (_playerType != Enums.ClientType.Spectator && _gameMessage == null)
+    {
+        <button type="button" @onclick="@SetPlayerIsReady" class="btn btn-success col">Play</button>
+    }
+    <div class="col makeGreen">Player 2: @_player2Points</div>
+</div>
+
+
 
 <div id="area">
     <div id="tophorizontalboundary"></div>
@@ -51,11 +74,12 @@
 @code {
     List<GameObject> _gameObjects = new List<GameObject>();
     HubConnection _connection;
-    // Per non lasciare cliccare nulla fino a che non esiste una connessione reale
-    bool _clickOnPageDisabled = true;
     Enums.ClientType _playerType;
     double _mouseOffset = 0;
-    string _message;
+    int _player1Points;
+    int _player2Points;
+    string _playerTypeMessage;
+    string _gameMessage;
     Timer _updateServerTimer;
 
     protected override async Task OnInitializedAsync()
@@ -70,13 +94,16 @@
             .WithAutomaticReconnect()
             .Build();
 #else
-_connection = new HubConnectionBuilder()
-    .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
-    .WithAutomaticReconnect()
-    .Build();
+        _connection = new HubConnectionBuilder()
+            .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub")
+            .WithAutomaticReconnect()
+            .Build();
 #endif
 
         _connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
+        _connection.On<Enums.ClientType, int>("UpdatePlayerPoints", this.UpdatePlayerPoints);
+        _connection.On<string>("UpdateGameMessage", this.UpdateGameMessage);
+        
         await _connection.StartAsync();
 
         // Ricavo che tipo di player sono(1, 2 o spettatore)
@@ -85,29 +112,59 @@ _connection = new HubConnectionBuilder()
         switch (_playerType)
         {
             case Enums.ClientType.Player1:
-                _message = "Sei il player1";
+                _playerTypeMessage = "Sei il player1";
                 break;
             case Enums.ClientType.Player2:
-                _message = "Sei il player2";
+                _playerTypeMessage = "Sei il player2";
                 break;
             default:
-                _message = "Sei uno spettatore";
+                _playerTypeMessage = "Sei uno spettatore";
                 break;
         }
 
-        // Richiama
-        this.InitializeGameObjects();
-
-        _clickOnPageDisabled = false;
+        this.GetOrInitializeGameObjects();
 
         // Ogni decimo di secondo controlliamo se necessario fare l'update delle collisioni al server e in caso lo mandiamo
         // Iniziamo un secondo dopo l'inizializzazione del timer
         _updateServerTimer = new Timer(UpdateServer, null, 1000, 100);
     }
 
-    public void MoveOnYAxisAndFlag(UIDragEventArgs e, GameObject go)
+    private async void UpdateGameMessage(string serverMessage)
     {
-        if (!go.Draggable || _clickOnPageDisabled)
+        _gameMessage = serverMessage;
+        StateHasChanged();
+        
+        // Lascio che l'utente veda il messaggio finale
+        await Task.Delay(10000);
+        
+        // Lo resetto a null per mostrare il pulsante play
+        _gameMessage = null;
+
+        this.StateHasChanged();
+    }
+
+    private Task UpdatePlayerPoints(Enums.ClientType clientType, int points)
+    {
+        switch (clientType)
+        {
+            case Enums.ClientType.Player1:
+                _player1Points = points;
+                _gameMessage = "Punto per il player1!";
+                break;
+            case Enums.ClientType.Player2:
+                _player2Points = points;
+                _gameMessage = "Punto per il player2!";
+                break;
+        }
+
+        this.StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+    private void MoveOnYAxisAndFlag(UIDragEventArgs e, GameObject go)
+    {
+        if (!go.Draggable)
         {
             return;
         }
@@ -187,11 +244,11 @@ _connection = new HubConnectionBuilder()
         var bHeight = gameObjectB.Height;
 
         return !(
-            ((aTop + aHeight) < (bTop)) ||
-            (aTop > (bTop + bHeight)) ||
-            ((aLeft + aWidth) < bLeft) ||
-            (aLeft > (bLeft + bWidth))
-            );
+            aTop + aHeight < bTop ||
+            aTop > bTop + bHeight ||
+            aLeft + aWidth < bLeft ||
+            aLeft > bLeft + bWidth
+        );
     }
 
     private async Task UpdateGameObjectPositions()
@@ -207,51 +264,23 @@ _connection = new HubConnectionBuilder()
         }
     }
 
-    private async void InitializeGameObjects()
+    private async void GetOrInitializeGameObjects()
     {
-        if (_playerType != Enums.ClientType.Spectator)
+        // Chiedo al server la posizione di ogni oggetto e aspetto la risposta
+        this._gameObjects = await _connection.InvokeAsync<List<GameObject>>("GetGameObjects");
+
+        // Infine setto i draggable che non dipendono dal server
+        foreach (var gameObject in _gameObjects)
         {
-            this._gameObjects = new List<GameObject>()
+            switch (gameObject.Id)
             {
-                new GameObject()
-                {
-                    Id = "player1",
-                    LastUpdatedBy = null,
-                    Left = 100,
-                    Top = 100,
-                    Draggable = _playerType == Enums.ClientType.Player1,
-                    Width = 20,
-                    Height = 100
-                },
-                new GameObject()
-                {
-                    Id = "player2",
-                    LastUpdatedBy = null,
-                    Left = 880,
-                    Top = 100,
-                    Draggable = _playerType == Enums.ClientType.Player2,
-                    Width = 20,
-                    Height = 100
-                },
-                new GameObject()
-                {
-                    Id = "ball",
-                    LastUpdatedBy = null,
-                    Left = 500,
-                    Top = 250,
-                    Width = 20,
-                    Height = 20
-                }
-            };
-
-            // Ora che la connessione è presente, mandiamo gli oggetti al server
-            await _connection.SendAsync("AddMissingGameObjects", this._gameObjects);
-
-        }
-        else
-        {
-            // Altrimenti chiedo al server la posizione di ogni oggetto e aspetto la risposta
-            this._gameObjects = await _connection.InvokeAsync<List<GameObject>>("GetGameObjects");
+                case "player1":
+                    gameObject.Draggable = _playerType == Enums.ClientType.Player1;
+                    break;
+                case "player2":
+                    gameObject.Draggable = _playerType == Enums.ClientType.Player2;
+                    break;
+            }
         }
     }
 
@@ -260,6 +289,11 @@ _connection = new HubConnectionBuilder()
     /// </summary>
     private Task UpdateGameObjectPositionOnClient(GameObject updatedObj)
     {
+        if (_gameMessage != null && _gameMessage != "Game started!")
+        {
+            _gameMessage = "Game started!";
+        }
+
         for (int i = 0; i < _gameObjects.Count; i++)
         {
             var gameObject = _gameObjects[i];
@@ -273,7 +307,6 @@ _connection = new HubConnectionBuilder()
             _gameObjects[i].Left = updatedObj.Left;
         }
 
-        // Se siamo qui devo renderizzare di nuovo la UI, anche se non c'è stata interazione da parte del client
         this.StateHasChanged();
 
         return Task.CompletedTask;
@@ -319,6 +352,13 @@ _connection = new HubConnectionBuilder()
     {
         Dispose();
         return Task.CompletedTask;
+    }
+
+    private async void SetPlayerIsReady()
+    {
+        await _connection.SendAsync("SetPlayerIsReady");
+        _gameMessage = "Waiting for the other player...";
+        StateHasChanged();
     }
 
     // TODO Implementa logica per scelta del tipo di connessione

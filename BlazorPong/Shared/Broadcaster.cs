@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BlazorPong.Controllers;
@@ -12,7 +13,6 @@ namespace BlazorPong.Shared
     public class Broadcaster : BackgroundService
     {
         private readonly IHubContext<GameHub, IBlazorPongClient> _hubContext;
-        //private readonly GameHub _hubContext;
         private readonly ServerGameController _gameController;
 
         public Broadcaster(IHubContext<GameHub, IBlazorPongClient> hub, ServerGameController gameController)
@@ -21,38 +21,67 @@ namespace BlazorPong.Shared
             _gameController = gameController;
         }
 
-        //public Broadcaster(GameHub hub, ServerGameController gameController)
-        //{
-        //    _hubContext = hub;
-        //    _gameController = gameController;
-        //}
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested && _hubContext != null)
             {
-                if (_hubContext != null && _gameController.GameObjects.Count == 3 && _gameController.MustPlayGame())
+                if (_gameController.MustPlayGame())
                 {
                     // Faccio sempre muovere la palla
-                    _gameController.BallController.Update();
+                    var pointPlayerName = _gameController.BallController.Update();
 
-                    foreach (var gameObject in _gameController.GameObjects.Where(g => g.Moved))
+                    // Se nessuno ha fatto punto
+                    if (pointPlayerName == null)
                     {
-                        // Se so chi ha fatto l'update evito di mandarglielo
-                        if (gameObject.LastUpdatedBy != null)
+                        foreach (var gameObject in _gameController.GameObjects.Where(g => g.Moved))
                         {
-                            await _hubContext.Clients.AllExcept(gameObject.LastUpdatedBy).UpdateGameObjectPositionOnClient(gameObject);
+                            // Se so chi ha fatto l'update evito di mandarglielo
+                            if (gameObject.LastUpdatedBy != null)
+                            {
+                                await _hubContext.Clients.AllExcept(gameObject.LastUpdatedBy).UpdateGameObjectPositionOnClient(gameObject);
+                            }
+                            else
+                            {
+                                await _hubContext.Clients.All.UpdateGameObjectPositionOnClient(gameObject);
+                            }
+
+                            gameObject.Moved = false;
+                        }
+                    }
+                    else
+                    {
+                        int playerPoints;
+                        Enums.ClientType playerType;
+                        // Altrimenti aggiungo il punto e resetto il tutto
+                        if (pointPlayerName.Equals("player1"))
+                        {
+                            playerPoints = _gameController.AddPlayer1Point();
+                            playerType = Enums.ClientType.Player1;
                         }
                         else
                         {
-                            await _hubContext.Clients.All.UpdateGameObjectPositionOnClient(gameObject);
+                            playerPoints = _gameController.AddPlayer2Point();
+                            playerType = Enums.ClientType.Player2;
                         }
 
-                        gameObject.Moved = false;
+                        await _hubContext.Clients.All.UpdatePlayerPoints(playerType, playerPoints);
+                        // Da il tempo di visualizzare il messaggio del punto se il gioco non deve essere resettato
+                        if (!_gameController.MustReset())
+                        {
+                            await Task.Delay(3000, stoppingToken);
+                        }
                     }
                 }
 
-                await Task.Delay(40, stoppingToken);
+                if (_gameController.MustReset())
+                {
+                    string gameOverMessage = _gameController.GetGameOverMessage();
+                    await _hubContext.Clients.All.UpdateGameMessage(gameOverMessage);
+                }
+                else
+                {
+                    await Task.Delay(40, stoppingToken);
+                }
             }
         }
     }

@@ -7,5 +7,7 @@ namespace BlazorPong.Interfaces
     public interface IBlazorPongClient : IHostedService
     {
         Task UpdateGameObjectPositionOnClient(GameObject gameObject);
+        Task UpdatePlayerPoints(Enums.ClientType clientType, int points);
+        Task UpdateGameMessage(string gameOverMessage);
     }
 }
