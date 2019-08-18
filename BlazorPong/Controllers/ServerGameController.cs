@@ -157,6 +157,13 @@ namespace BlazorPong.Controllers
             return _player1Points;
         }
 
+        public void Player1Disconnected()
+        {
+            InitializeGameObjectsOnServer(true);
+            _player2Points = 3;
+            _gameMustReset = true;
+        }
+
         public int AddPlayer2Point()
         {
             _player2Points++;
@@ -166,6 +173,13 @@ namespace BlazorPong.Controllers
                 _gameMustReset = true;
             }
             return _player2Points;
+        }
+
+        public void Player2Disconnected()
+        {
+            InitializeGameObjectsOnServer(true);
+            _player1Points = 3;
+            _gameMustReset = true;
         }
 
         public string GetGameOverMessage()

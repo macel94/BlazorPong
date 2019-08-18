@@ -91,12 +91,18 @@ namespace BlazorPong
         {
             if (_gameController.GetPlayer1ConnectionId() == Context.ConnectionId)
             {
-                // TODO Fai il dispose del broadcaster
+                if (_gameController.MustPlayGame())
+                {
+                    _gameController.Player1Disconnected();
+                }
                 _gameController.SetPlayer1ConnectionId(null);
             }
             else if (_gameController.GetPlayer2ConnectionId() == Context.ConnectionId)
             {
-                // TODO riconnetti broadcaster se necessario
+                if (_gameController.MustPlayGame())
+                {
+                    _gameController.Player2Disconnected();
+                }
                 _gameController.SetPlayer2ConnectionId(null);
             }
 
