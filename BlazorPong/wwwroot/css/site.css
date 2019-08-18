@@ -5,7 +5,11 @@ html, body {
 }
 
 a {
-    color: #0366d6;
+    color: #008000;
+}
+
+p .a{
+    display: inline;
 }
 
 .btn-primary {

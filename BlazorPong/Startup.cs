@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using BlazorPong.Data;
 using BlazorPong.Shared;
 using Microsoft.AspNetCore.SignalR.Client;
 
@@ -26,14 +25,13 @@ namespace BlazorPong
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddTransient<HubConnectionBuilder>();
-            services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<ServerGameController>();
             services.AddSignalR();
             services.AddHostedService<Broadcaster>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider sp)
+        public void Configure(IApplicationBuilder app)
         {
             //TODO -oFBE: Utilizza lo standard qui sotto
             //if (env.IsDevelopment())
@@ -62,9 +60,6 @@ namespace BlazorPong
                 endpoints.MapHub<GameHub>("/gamehub");
                 endpoints.MapFallbackToPage("/_Host");
             });
-
-            //GlobalContext.GlobalHubContext = sp.GetService<GameHub>();
-            //GlobalContext.GlobalServerGameController = sp.GetService<ServerGameController>();
         }
     }
 }

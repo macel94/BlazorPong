@@ -37,20 +37,27 @@
     }
 
     .makeRed {
-        color: red
+        color: red;
+        text-align: center;
     }
 
     .makeGreen {
-        color: green
+        color: green;
+        text-align: center;
+    }
+
+    .makeGolden {
+        color: goldenrod;
+        text-align: center;
     }
 </style>
 
-<h2 id="message">@_playerTypeMessage</h2>
+<h2 id="message" class="makeGolden">@_playerTypeMessage</h2>
 
 <div class="row">
     @if (_connection == null || (_connection.State != HubConnectionState.Connected && _connection.State != HubConnectionState.Reconnecting))
     {
-        <h4>@_connectionMessage</h4>
+        <h4 class="makeGolden">@_connectionMessage</h4>
         <div class="form-row align-items-center">
             <div class="col-auto my-1">
                 <label class="mr-sm-2 sr-only" for="inlineFormCustomSelect">Connection Type</label>
@@ -68,15 +75,15 @@
     }
     else
     {
-        <div class="col makeRed">Player 1: @_player1Points</div>
         @if (_gameMessage != null)
         {
-            <div class="col">@_gameMessage</div>
+            <h4 class="col makeGolden">@_gameMessage</h4>
         }
         @if (_playerType != Enums.ClientType.Spectator && _gameMessage == null)
         {
             <button type="button" @onclick="@SetPlayerIsReady" class="btn btn-success col">Play</button>
         }
+        <div class="col makeRed">Player 1: @_player1Points</div>
         <div class="col makeGreen">Player 2: @_player2Points</div>
     }
     @* Solo per centrare il contenuto *@
@@ -165,13 +172,13 @@
         switch (_playerType)
         {
             case Enums.ClientType.Player1:
-                _playerTypeMessage = "You are player1";
+                _playerTypeMessage = "You are Player1";
                 break;
             case Enums.ClientType.Player2:
-                _playerTypeMessage = "You are player2";
+                _playerTypeMessage = "You are Player2";
                 break;
             default:
-                _playerTypeMessage = "You are a spectator";
+                _playerTypeMessage = "You are a Spectator";
                 break;
         }
 
