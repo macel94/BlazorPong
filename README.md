@@ -14,4 +14,4 @@ Devops integrated, deployed as self-contained, 32 bit because i chose the free t
 Using SignalR Core
 
 # Website
-https://blazorpong-dev-as.azurewebsites.net/pong
+https://blazorpong-dev-as.azurewebsites.net/
