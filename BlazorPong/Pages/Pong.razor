@@ -180,7 +180,6 @@
         // Ogni decimo di secondo controlliamo se necessario fare l'update delle collisioni al server e in caso lo mandiamo
         // Iniziamo un secondo dopo l'inizializzazione del timer
         _updateServerTimer = new Timer(UpdateServer, null, 1000, 10);
-        Console.WriteLine(_connection.ConnectionId);
     }
 
     private async void UpdateGameMessage(string serverMessage)
