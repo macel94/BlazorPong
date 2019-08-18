@@ -2,7 +2,9 @@
 @using System.Threading
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Http.Connections
+@using Microsoft.AspNetCore.SignalR
 @using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Logging
 @implements IDisposable
 @inject IJSRuntime JsRuntime;
 
@@ -77,6 +79,8 @@
         }
         <div class="col makeGreen">Player 2: @_player2Points</div>
     }
+    @* Solo per centrare il contenuto *@
+    <div class="col"></div>
 </div>
 
 
@@ -135,12 +139,18 @@
         _connection = new HubConnectionBuilder()
             .WithUrl("https://localhost/gamehub", _connectionTypeChoice)
             .WithAutomaticReconnect()
+            .ConfigureLogging(logging => {
+                logging.AddDebug();
+
+                // Set the default log level to Information, but to Debug for SignalR-related loggers.
+                logging.SetMinimumLevel(LogLevel.Information);
+            })
             .Build();
 #else
-    _connection = new HubConnectionBuilder()
-        .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub", _connectionTypeChoice)
-        .WithAutomaticReconnect()
-        .Build();
+        _connection = new HubConnectionBuilder()
+            .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub", _connectionTypeChoice)
+            .WithAutomaticReconnect()
+            .Build();
 #endif
 
         _connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
@@ -155,13 +165,13 @@
         switch (_playerType)
         {
             case Enums.ClientType.Player1:
-                _playerTypeMessage = "Sei il player1";
+                _playerTypeMessage = "You are player1";
                 break;
             case Enums.ClientType.Player2:
-                _playerTypeMessage = "Sei il player2";
+                _playerTypeMessage = "You are player2";
                 break;
             default:
-                _playerTypeMessage = "Sei uno spettatore";
+                _playerTypeMessage = "You are a spectator";
                 break;
         }
 
@@ -169,7 +179,8 @@
 
         // Ogni decimo di secondo controlliamo se necessario fare l'update delle collisioni al server e in caso lo mandiamo
         // Iniziamo un secondo dopo l'inizializzazione del timer
-        _updateServerTimer = new Timer(UpdateServer, null, 1000, 100);
+        _updateServerTimer = new Timer(UpdateServer, null, 1000, 10);
+        Console.WriteLine(_connection.ConnectionId);
     }
 
     private async void UpdateGameMessage(string serverMessage)
@@ -192,11 +203,11 @@
         {
             case Enums.ClientType.Player1:
                 _player1Points = points;
-                _gameMessage = "Punto per il player1!";
+                _gameMessage = "Player1 just made a point!";
                 break;
             case Enums.ClientType.Player2:
                 _player2Points = points;
-                _gameMessage = "Punto per il player2!";
+                _gameMessage = "Player2 just made a point!";
                 break;
         }
 

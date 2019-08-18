@@ -80,7 +80,7 @@ namespace BlazorPong.Shared
                 }
                 else
                 {
-                    await Task.Delay(40, stoppingToken);
+                    await Task.Delay(10, stoppingToken);
                 }
             }
         }

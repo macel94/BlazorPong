@@ -174,11 +174,11 @@ namespace BlazorPong.Controllers
             // Dato che prendo il messaggio, riporto i punti a 0 come anche lo stato di player ready
             if (_player1Points == 3)
             {
-                result = "Ha vinto il player1!";
+                result = "Player1 won!";
             }
             else if (_player2Points == 3)
             {
-                result = "Ha vinto il player2!";
+                result = "Player2 won!";
             }
 
             _player1Points = 0;
