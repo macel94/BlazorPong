@@ -6,5 +6,8 @@
     },
     unsetOnbeforeunload: function (instance) {
         window.onbeforeunload = null;
+    },
+    log: function(message) {
+        console.log(message);
     }
 };

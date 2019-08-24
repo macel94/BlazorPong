@@ -18,12 +18,8 @@ namespace BlazorPong
             _gameController = sgc;
         }
 
-        // TODO -FBE: Controlla se possibile se si può implementare un bot che gioca contro di te
         public void UpdateGameObjectPosition(GameObject clientGameObject)
         {
-            // Per ora nessuna proprietà deve stare nell'interfaccia client
-            //string playerName = Clients.Caller.PlayerName;
-            //Trace.TraceInformation("a player" + " moved to position " + clientGameObject.Top);
             clientGameObject.LastUpdatedBy = Context.ConnectionId;
             _gameController.UpdateGameObjectPositionOnServer(clientGameObject);
         }
