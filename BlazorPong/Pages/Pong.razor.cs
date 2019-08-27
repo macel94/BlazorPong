@@ -68,7 +68,7 @@ namespace BlazorPong.Pages
             Connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
             Connection.On<Enums.ClientType, int>("UpdatePlayerPoints", this.UpdatePlayerPoints);
             Connection.On<string>("UpdateGameMessage", this.UpdateGameMessage);
-            
+
             await LogOnClient("State: " + Connection.State.ToString() + "Type:" + _connectionTypeChoice.ToString());
 
             await Connection.StartAsync();
@@ -116,6 +116,10 @@ namespace BlazorPong.Pages
 
             // Lo resetto a null per mostrare il pulsante play
             GameMessage = null;
+
+            // Resetto i player points
+            Player1Points = 0;
+            Player2Points = 0;
 
             this.StateHasChanged();
         }
