@@ -68,8 +68,14 @@ namespace BlazorPong.Pages
             Connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
             Connection.On<Enums.ClientType, int>("UpdatePlayerPoints", this.UpdatePlayerPoints);
             Connection.On<string>("UpdateGameMessage", this.UpdateGameMessage);
+            
+            await LogOnClient("State: " + Connection.State.ToString() + "Type:" + _connectionTypeChoice.ToString());
 
             await Connection.StartAsync();
+
+            await LogOnClient("State: " + Connection.State.ToString() + "Type:" + _connectionTypeChoice.ToString());
+
+            await LogOnClient("ConnectionId: " + Connection.ConnectionId.ToString());
 
             // Ricavo che tipo di player sono(1, 2 o spettatore)
             _playerType = await Connection.InvokeAsync<Enums.ClientType>("GetClientType");
@@ -90,7 +96,7 @@ namespace BlazorPong.Pages
             }
 
             this.GetOrInitializeGameObjects();
-            
+
             await LogOnClient("GameObjects initialization completed.");
 
             // Ogni decimo di secondo controlliamo se necessario fare l'update delle collisioni al server e in caso lo mandiamo
