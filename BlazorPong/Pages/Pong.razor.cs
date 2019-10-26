@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BlazorPong.Shared;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
@@ -144,7 +143,7 @@ namespace BlazorPong.Pages
             return Task.CompletedTask;
         }
 
-        protected void MoveOnYAxisAndFlag(DragEventArgs e, GameObject go)
+        protected void MoveOnYAxisAndFlag(UIDragEventArgs e, GameObject go)
         {
             if (!go.Draggable)
             {
@@ -316,20 +315,20 @@ namespace BlazorPong.Pages
             }
         }
 
-        private async ValueTask SetOnbeforeunload()
+        private async Task SetOnbeforeunload()
         {
-            await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.setOnbeforeunload", DotNetObjectReference.Create(this));
+            await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.setOnbeforeunload", DotNetObjectRef.Create(this));
         }
 
-        private async ValueTask UnsetOnbeforeunload()
+        private async Task UnsetOnbeforeunload()
         {
-            await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.unsetOnbeforeunload", DotNetObjectReference.Create(this));
+            await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.unsetOnbeforeunload", DotNetObjectRef.Create(this));
         }
 
         /// <summary>
         /// Metodo utilizzato per loggare lato client, a scopo dimostrativo non essendoci un logger ufficialmente implementato dalla microsoft, per ora.
         /// </summary>
-        private async ValueTask LogOnClient(string message)
+        private async Task LogOnClient(string message)
         {
             await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.log", message);
         }
@@ -352,7 +351,7 @@ namespace BlazorPong.Pages
             StateHasChanged();
         }
 
-        protected void SaveChoice(ChangeEventArgs e)
+        protected void SaveChoice(UIChangeEventArgs e)
         {
             _connectionTypeChoice = ConnectionTypesDictionary[e.Value.ToString()];
         }
