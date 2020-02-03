@@ -6,7 +6,7 @@ using BlazorPong.Interfaces;
 using BlazorPong.Shared;
 using Microsoft.AspNetCore.SignalR;
 
-namespace BlazorPong
+namespace BlazorPongServer
 {
     public class GameHub : Hub<IBlazorPongClient>
     {

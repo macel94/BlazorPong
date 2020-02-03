@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# ASP0001: Authorization middleware is incorrectly configured.
+dotnet_diagnostic.ASP0001.severity = warning

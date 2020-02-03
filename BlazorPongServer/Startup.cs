@@ -1,13 +1,13 @@
-using System;
-using BlazorPong.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using BlazorPong.Shared;
+using BlazorPongServer.Data;
 using Microsoft.AspNetCore.SignalR.Client;
+using BlazorPong.Controllers;
+using BlazorPong.Shared;
 
-namespace BlazorPong
+namespace BlazorPongServer
 {
     public class Startup
     {
@@ -24,6 +24,7 @@ namespace BlazorPong
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddSingleton<WeatherForecastService>();
             services.AddTransient<HubConnectionBuilder>();
             services.AddSingleton<ServerGameController>();
             services.AddSignalR();
@@ -31,8 +32,20 @@ namespace BlazorPong
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // Nuovo commento
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseDeveloperExceptionPage();
+            //}
+            //else
+            //{
+            //    app.UseExceptionHandler("/Error");
+            //    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            //    app.UseHsts();
+            //}
+
             //TODO -oFBE: Utilizza lo standard qui sotto
             //if (env.IsDevelopment())
             //{

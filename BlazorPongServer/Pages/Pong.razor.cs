@@ -5,15 +5,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using BlazorPong.Shared;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 
-namespace BlazorPong.Pages
+namespace BlazorPongServer.Pages
 {
     public class PongBase : ComponentBase, IDisposable
     {
-        protected List<GameObject> GameObjects = new List<GameObject>();
+        public List<GameObject> GameObjects = new List<GameObject>();
         protected HubConnection Connection;
         protected Dictionary<string, HttpTransportType> ConnectionTypesDictionary;
         protected Enums.ClientType _playerType;
@@ -33,29 +34,29 @@ namespace BlazorPong.Pages
         {
             ConnectionMessage = "Please select a type of connection and click 'Connect'.";
             ConnectionTypesDictionary = new Dictionary<string, HttpTransportType>()
-    {
             {
-                "WebSockets", HttpTransportType.WebSockets
-            },
-            {
-                "LongPolling", HttpTransportType.LongPolling
-            },
-            {
-                "ServerSentEvents", HttpTransportType.ServerSentEvents
-            },
-        };
+                {
+                    "WebSockets", HttpTransportType.WebSockets
+                },
+                {
+                    "LongPolling", HttpTransportType.LongPolling
+                },
+                {
+                    "ServerSentEvents", HttpTransportType.ServerSentEvents
+                },
+            };
             _connectionTypeChoice = HttpTransportType.WebSockets;
         }
 
         protected async Task ConnectToHub()
         {
-            await this.SetOnbeforeunload();
+            await SetOnbeforeunload();
 
 #if DEBUG
             // 44364 DEVELOPMENT(IIS)
             // 443 PROD o DEV BlazorPong Env(Forced Https)
             Connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost/gamehub", _connectionTypeChoice)
+                .WithUrl("https://localhost:5001/gamehub", _connectionTypeChoice)
                 .WithAutomaticReconnect()
                 .Build();
 #else
@@ -65,9 +66,9 @@ namespace BlazorPong.Pages
                 .Build();
 #endif
 
-            Connection.On<GameObject>("UpdateGameObjectPositionOnClient", this.UpdateGameObjectPositionOnClient);
-            Connection.On<Enums.ClientType, int>("UpdatePlayerPoints", this.UpdatePlayerPoints);
-            Connection.On<string>("UpdateGameMessage", this.UpdateGameMessage);
+            Connection.On<GameObject>("UpdateGameObjectPositionOnClient", UpdateGameObjectPositionOnClient);
+            Connection.On<Enums.ClientType, int>("UpdatePlayerPoints", UpdatePlayerPoints);
+            Connection.On<string>("UpdateGameMessage", UpdateGameMessage);
 
             await LogOnClient("State: " + Connection.State.ToString() + "Type:" + _connectionTypeChoice.ToString());
 
@@ -95,7 +96,7 @@ namespace BlazorPong.Pages
                     break;
             }
 
-            this.GetOrInitializeGameObjects();
+            GetOrInitializeGameObjects();
 
             await LogOnClient("GameObjects initialization completed.");
 
@@ -121,7 +122,7 @@ namespace BlazorPong.Pages
             Player1Points = 0;
             Player2Points = 0;
 
-            this.StateHasChanged();
+            StateHasChanged();
         }
 
         private Task UpdatePlayerPoints(Enums.ClientType clientType, int points)
@@ -138,12 +139,12 @@ namespace BlazorPong.Pages
                     break;
             }
 
-            this.StateHasChanged();
+            StateHasChanged();
 
             return Task.CompletedTask;
         }
 
-        protected void MoveOnYAxisAndFlag(UIDragEventArgs e, GameObject go)
+        protected void MoveOnYAxisAndFlag(DragEventArgs e, GameObject go)
         {
             if (!go.Draggable)
             {
@@ -191,7 +192,7 @@ namespace BlazorPong.Pages
 
             await UpdateGameObjectPositions();
 
-            var playerGameObject = tempGameObjects.FirstOrDefault(go => go.Id.Equals((_playerType == Enums.ClientType.Player1 ? "player1" : "player2")));
+            var playerGameObject = tempGameObjects.FirstOrDefault(go => go.Id.Equals(_playerType == Enums.ClientType.Player1 ? "player1" : "player2"));
 
             if (playerGameObject != null)
             {
@@ -249,7 +250,7 @@ namespace BlazorPong.Pages
         private async void GetOrInitializeGameObjects()
         {
             // Chiedo al server la posizione di ogni oggetto e aspetto la risposta
-            this.GameObjects = await Connection.InvokeAsync<List<GameObject>>("GetGameObjects");
+            GameObjects = await Connection.InvokeAsync<List<GameObject>>("GetGameObjects");
 
             // Infine setto i draggable che non dipendono dal server
             foreach (var gameObject in GameObjects)
@@ -289,7 +290,7 @@ namespace BlazorPong.Pages
                 GameObjects[i].Left = updatedObj.Left;
             }
 
-            this.StateHasChanged();
+            StateHasChanged();
 
             return Task.CompletedTask;
         }
@@ -307,7 +308,7 @@ namespace BlazorPong.Pages
 
             try
             {
-                await this.UnsetOnbeforeunload();
+                await UnsetOnbeforeunload();
             }
             catch
             {
@@ -317,12 +318,12 @@ namespace BlazorPong.Pages
 
         private async Task SetOnbeforeunload()
         {
-            await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.setOnbeforeunload", DotNetObjectRef.Create(this));
+            await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.setOnbeforeunload", DotNetObjectReference.Create(this));
         }
 
         private async Task UnsetOnbeforeunload()
         {
-            await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.unsetOnbeforeunload", DotNetObjectRef.Create(this));
+            await JsRuntime.InvokeAsync<object>("blazorJSPongInterop.unsetOnbeforeunload", DotNetObjectReference.Create(this));
         }
 
         /// <summary>
@@ -351,7 +352,7 @@ namespace BlazorPong.Pages
             StateHasChanged();
         }
 
-        protected void SaveChoice(UIChangeEventArgs e)
+        protected void SaveChoice(ChangeEventArgs e)
         {
             _connectionTypeChoice = ConnectionTypesDictionary[e.Value.ToString()];
         }

@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29123.89
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorPong", "BlazorPong\BlazorPong.csproj", "{55F1CF03-3DC1-4B63-B0EA-89E93AE435DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorPongServer", "BlazorPongServer\BlazorPongServer.csproj", "{0102E731-35B2-4EF6-871A-F1C2847DFCEE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E4C0D404-DFB3-431E-9D19-4C2EEFB9D0B6}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +16,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{55F1CF03-3DC1-4B63-B0EA-89E93AE435DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{55F1CF03-3DC1-4B63-B0EA-89E93AE435DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{55F1CF03-3DC1-4B63-B0EA-89E93AE435DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{55F1CF03-3DC1-4B63-B0EA-89E93AE435DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0102E731-35B2-4EF6-871A-F1C2847DFCEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0102E731-35B2-4EF6-871A-F1C2847DFCEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0102E731-35B2-4EF6-871A-F1C2847DFCEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0102E731-35B2-4EF6-871A-F1C2847DFCEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

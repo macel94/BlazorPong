@@ -1,4 +1,4 @@
-﻿namespace BlazorPong
+﻿namespace BlazorPongServer
 {
     public static class Enums
     {

@@ -55,7 +55,7 @@
         <div class="form-row align-items-center">
             <div class="col-auto my-1">
                 <label class="mr-sm-2 sr-only" for="inlineFormCustomSelect">Connection Type</label>
-                <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" @onchange=@SaveChoice>
+                <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" @onchange=SaveChoice>
                     @foreach (var connectionType in ConnectionTypesDictionary.Keys)
                     {
                         <option value=@connectionType>@connectionType</option>
@@ -63,7 +63,7 @@
                 </select>
             </div>
             <div class="col-auto my-1">
-                <button type="button" @onclick="@ConnectToHub" class="btn btn-primary">Connect</button>
+                <button type="button" @onclick="ConnectToHub" class="btn btn-primary">Connect</button>
             </div>
         </div>
     }
@@ -75,7 +75,7 @@
         }
         @if (_playerType != Enums.ClientType.Spectator && GameMessage == null)
         {
-            <button type="button" @onclick="@SetPlayerIsReady" class="btn btn-success col">Play</button>
+            <button type="button" @onclick="SetPlayerIsReady" class="btn btn-success col">Play</button>
         }
         <div class="col makeRed">Player 1: @Player1Points</div>
         <div class="col makeGreen">Player 2: @Player2Points</div>
@@ -92,7 +92,7 @@
     @foreach (var go in GameObjects)
     {
         // ball, player1 e player2
-        <div id="@go.Id" draggable="@go.Draggable" @ondrag="@(e => MoveOnYAxisAndFlag(e, go))"></div>
+        <div id="@go.Id" draggable=@go.Draggable @ondrag="(e => MoveOnYAxisAndFlag(e, go))"></div>
     }
     <div id="bottomhorizontalboundary"></div>
     <div id="rightverticalboundary"></div>

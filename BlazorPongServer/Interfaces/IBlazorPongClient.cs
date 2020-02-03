@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using BlazorPong.Shared;
+using BlazorPongServer;
 using Microsoft.Extensions.Hosting;
 
 namespace BlazorPong.Interfaces

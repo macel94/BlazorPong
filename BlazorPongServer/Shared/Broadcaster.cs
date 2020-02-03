@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BlazorPong.Controllers;
 using BlazorPong.Interfaces;
+using BlazorPongServer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
 
