@@ -1,9 +1,7 @@
 ﻿using System.Threading.Tasks;
-using BlazorPong.Shared;
-using BlazorPongServer;
 using Microsoft.Extensions.Hosting;
 
-namespace BlazorPong.Interfaces
+namespace BlazorPong.BL.Contracts.Interfaces
 {
     public interface IBlazorPongClient : IHostedService
     {

@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BlazorPong.Shared;
+using BlazorPong.BL.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 
-namespace BlazorPongServer.Pages
+namespace BlazorPong.Components
 {
     public class PongBase : ComponentBase, IDisposable
     {
@@ -48,7 +48,7 @@ namespace BlazorPongServer.Pages
             _connectionTypeChoice = HttpTransportType.WebSockets;
         }
 
-        protected async Task ConnectToHub()
+        public async Task ConnectToHub()
         {
             await SetOnbeforeunload();
 
@@ -144,7 +144,7 @@ namespace BlazorPongServer.Pages
             return Task.CompletedTask;
         }
 
-        protected void MoveOnYAxisAndFlag(DragEventArgs e, GameObject go)
+        public void MoveOnYAxisAndFlag(DragEventArgs e, GameObject go)
         {
             if (!go.Draggable)
             {
@@ -345,14 +345,14 @@ namespace BlazorPongServer.Pages
             return Task.CompletedTask;
         }
 
-        protected async void SetPlayerIsReady()
+        public async void SetPlayerIsReady()
         {
             await Connection.SendAsync("SetPlayerIsReady");
             GameMessage = "Waiting for the other player...";
             StateHasChanged();
         }
 
-        protected void SaveChoice(ChangeEventArgs e)
+        public void SaveChoice(ChangeEventArgs e)
         {
             _connectionTypeChoice = ConnectionTypesDictionary[e.Value.ToString()];
         }

@@ -1,4 +1,4 @@
-﻿namespace BlazorPongServer
+﻿namespace BlazorPong.BL.Contracts
 {
     public static class Enums
     {

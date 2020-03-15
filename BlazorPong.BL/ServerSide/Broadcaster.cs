@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BlazorPong.Controllers;
-using BlazorPong.Interfaces;
-using BlazorPongServer;
-using Microsoft.AspNetCore.SignalR;
+using BlazorPong.BL.Contracts;
+using BlazorPong.BL.Contracts.Interfaces;
+using BlazorPong.BL.ServerSide.Controllers;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.SignalR;
 
-namespace BlazorPong.Shared
+
+namespace BlazorPong.BL.ServerSide
 {
     // This class signals the clients
     public class Broadcaster : BackgroundService

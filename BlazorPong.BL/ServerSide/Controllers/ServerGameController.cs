@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BlazorPong.Shared;
+using BlazorPong.BL.Contracts;
 
-namespace BlazorPong.Controllers
+namespace BlazorPong.BL.ServerSide.Controllers
 {
     public class ServerGameController
     {

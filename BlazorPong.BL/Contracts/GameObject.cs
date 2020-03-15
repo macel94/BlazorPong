@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace BlazorPong.Shared
+﻿namespace BlazorPong.BL.Contracts
 {
     public class GameObject
     {

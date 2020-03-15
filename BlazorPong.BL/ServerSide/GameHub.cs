@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BlazorPong.Controllers;
-using BlazorPong.Interfaces;
-using BlazorPong.Shared;
+using BlazorPong.BL.Contracts;
+using BlazorPong.BL.Contracts.Interfaces;
+using BlazorPong.BL.ServerSide.Controllers;
 using Microsoft.AspNetCore.SignalR;
 
-namespace BlazorPongServer
+namespace BlazorPong.BL.ServerSide
 {
     public class GameHub : Hub<IBlazorPongClient>
     {

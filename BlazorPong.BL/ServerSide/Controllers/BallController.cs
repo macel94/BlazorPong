@@ -1,7 +1,7 @@
 ﻿using System;
-using BlazorPong.Shared;
+using BlazorPong.BL.Contracts;
 
-namespace BlazorPong.Controllers
+namespace BlazorPong.BL.ServerSide.Controllers
 {
     public class BallController
     {

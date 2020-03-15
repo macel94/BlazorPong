@@ -1,11 +1,11 @@
+using BlazorPong.BL.ServerSide;
+using BlazorPong.BL.ServerSide.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using BlazorPongServer.Data;
 using Microsoft.AspNetCore.SignalR.Client;
-using BlazorPong.Controllers;
-using BlazorPong.Shared;
 
 namespace BlazorPongServer
 {
