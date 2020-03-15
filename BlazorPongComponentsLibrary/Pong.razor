@@ -1,8 +1,8 @@
-﻿@page "/pong"
-@using BlazorPong.BL.Contracts
+﻿@using BlazorPong.BL.Contracts
 @using Microsoft.AspNetCore.SignalR.Client
 @using BlazorPong.Components
 @inherits PongBase
+@namespace BlazorPong.Components
 
 <style>
     #player1 {
@@ -85,8 +85,6 @@
     @* Solo per centrare il contenuto *@
     <div class="col"></div>
 </div>
-
-
 
 <div id="area">
     <div id="tophorizontalboundary"></div>

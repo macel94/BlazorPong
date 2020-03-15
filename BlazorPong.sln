@@ -10,9 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorPong.Components", "BlazorPongComponentsLibrary\BlazorPong.Components.csproj", "{20768509-22F8-473C-B67D-B285D0A98626}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorPong.Components", "BlazorPongComponentsLibrary\BlazorPong.Components.csproj", "{20768509-22F8-473C-B67D-B285D0A98626}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorPong.BL", "BlazorPong.BL\BlazorPong.BL.csproj", "{602047CE-3006-4FE3-8D2C-23B506441F24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorPong.BL", "BlazorPong.BL\BlazorPong.BL.csproj", "{602047CE-3006-4FE3-8D2C-23B506441F24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
