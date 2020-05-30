@@ -26,6 +26,8 @@ namespace BlazorPong.Components
         protected string ConnectionMessage;
         private Timer _updateServerTimer;
         private HttpTransportType _connectionTypeChoice;
+        [Parameter]
+        public string GameHubEndpoint { get; set; }
         [Inject]
         // ReSharper disable once MemberCanBePrivate.Global
         public IJSRuntime JsRuntime { get; set; }
@@ -52,18 +54,23 @@ namespace BlazorPong.Components
         {
             await SetOnbeforeunload();
 
-#if DEBUG
-            // 44364 DEVELOPMENT(IIS)
+            // 44399 DEVELOPMENT(IIS)
             // 443 PROD o DEV BlazorPong Env(Forced Https)
             Connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:5001/gamehub", _connectionTypeChoice)
+                .WithUrl(GameHubEndpoint, _connectionTypeChoice)
                 .WithAutomaticReconnect()
                 .Build();
+#if DEBUG
+            //Connection = new HubConnectionBuilder()
+            //    .WithUrl("https://localhost:5001/gamehub", _connectionTypeChoice)
+            //    .WithAutomaticReconnect()
+            //    .Build();
+
 #else
-            Connection = new HubConnectionBuilder()
-                .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub", _connectionTypeChoice)
-                .WithAutomaticReconnect()
-                .Build();
+            //Connection = new HubConnectionBuilder()
+            //    .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub", _connectionTypeChoice)
+            //    .WithAutomaticReconnect()
+            //    .Build();
 #endif
 
             Connection.On<GameObject>("UpdateGameObjectPositionOnClient", UpdateGameObjectPositionOnClient);

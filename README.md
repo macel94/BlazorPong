@@ -1,5 +1,5 @@
 # BlazorPong
-BlazorPong Project for one of my University Exams
+BlazorPong Project for one of my University Exams + Thesis
 
 
 ## No javascript allowed(except for the JSInterop to listen to an event not supported by blazor or to log in browser console).

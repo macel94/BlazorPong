@@ -20,8 +20,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorPongWasm.Client", "Bl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorPongWasm.Server", "BlazorPongWasm\Server\BlazorPongWasm.Server.csproj", "{3BDC49FC-DE5A-436E-9371-0FFD757F0C73}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorPongWasm.Shared", "BlazorPongWasm\Shared\BlazorPongWasm.Shared.csproj", "{C9AE3470-F2E3-4871-8863-B254881A447E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,10 +42,6 @@ Global
 		{3BDC49FC-DE5A-436E-9371-0FFD757F0C73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BDC49FC-DE5A-436E-9371-0FFD757F0C73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BDC49FC-DE5A-436E-9371-0FFD757F0C73}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C9AE3470-F2E3-4871-8863-B254881A447E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9AE3470-F2E3-4871-8863-B254881A447E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9AE3470-F2E3-4871-8863-B254881A447E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9AE3470-F2E3-4871-8863-B254881A447E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,8 +9,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\BlazorPong.BL\BlazorPong.BL.csproj" />
     <ProjectReference Include="..\Client\BlazorPongWasm.Client.csproj" />
-    <ProjectReference Include="..\Shared\BlazorPongWasm.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 
