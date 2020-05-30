@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ClientSide\" />
+    <Compile Remove="ClientSide\**" />
+    <EmbeddedResource Remove="ClientSide\**" />
+    <None Remove="ClientSide\**" />
   </ItemGroup>
 
   <ItemGroup>
