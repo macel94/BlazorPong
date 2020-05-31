@@ -3,10 +3,12 @@
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 
-<p>
-    Here we are in <strong>@this.GetType().Name</strong> in the <strong>@Assembly.GetExecutingAssembly().FullName</strong> assembly, <br />
-    calling <strong>@nameof(Pong)</strong> component, located in the <strong>@typeof(Pong).Assembly.FullName assembly</strong>
-</p>
+    <p>
+        Here we are in <strong>@this.GetType().Name</strong> in the <strong>@Assembly.GetExecutingAssembly().FullName</strong> assembly, <br />
+        calling <strong>@nameof(Pong)</strong> component, located in the <strong>@typeof(Pong).Assembly.FullName</strong> assembly.
+        <br/>
+        <br/>
+    </p>
 
 <BlazorPong.Components.Pong GameHubEndpoint="@GetGameHubEndpointFromConfig()" />
 
