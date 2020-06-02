@@ -22,3 +22,6 @@ Deploy status: ![Deployment Status](https://francesco-belacca.vsrm.visualstudio.
 https://blazorpong-dev-as.azurewebsites.net/
 
 https://blazorpongwasm.azurewebsites.net/
+
+#Credits
+Inspired by https://github.com/coffeeboyds/Demos/tree/master/PongSignalR
