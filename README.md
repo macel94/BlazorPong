@@ -23,5 +23,5 @@ https://blazorpong-dev-as.azurewebsites.net/
 
 https://blazorpongwasm.azurewebsites.net/
 
-#Credits
+# Credits
 Inspired by https://github.com/coffeeboyds/Demos/tree/master/PongSignalR
