@@ -26,6 +26,8 @@ namespace BlazorPong.Components
         protected string ConnectionMessage;
         private Timer _updateServerTimer;
         private HttpTransportType _connectionTypeChoice;
+        [Inject]
+        public NavigationManager NavigationManager { get; set; }
         [Parameter]
         public string GameHubEndpoint { get; set; }
         [Inject]
@@ -56,22 +58,11 @@ namespace BlazorPong.Components
 
             // 44399 DEVELOPMENT(IIS)
             // 443 PROD o DEV BlazorPong Env(Forced Https)
+            var endpoint = GameHubEndpoint.Equals("rel") ? $"{NavigationManager.BaseUri}gamehub" : GameHubEndpoint;
             Connection = new HubConnectionBuilder()
-                .WithUrl(GameHubEndpoint, _connectionTypeChoice)
+                .WithUrl(endpoint, _connectionTypeChoice)
                 .WithAutomaticReconnect()
                 .Build();
-#if DEBUG
-            //Connection = new HubConnectionBuilder()
-            //    .WithUrl("https://localhost:5001/gamehub", _connectionTypeChoice)
-            //    .WithAutomaticReconnect()
-            //    .Build();
-
-#else
-            //Connection = new HubConnectionBuilder()
-            //    .WithUrl("https://blazorpong-dev-as.azurewebsites.net/gamehub", _connectionTypeChoice)
-            //    .WithAutomaticReconnect()
-            //    .Build();
-#endif
 
             Connection.On<GameObject>("UpdateGameObjectPositionOnClient", UpdateGameObjectPositionOnClient);
             Connection.On<Enums.ClientType, int>("UpdatePlayerPoints", UpdatePlayerPoints);
