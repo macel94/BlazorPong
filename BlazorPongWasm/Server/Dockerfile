@@ -3,6 +3,7 @@
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-focal AS base
 WORKDIR /app
 EXPOSE 80
+#La espongo solo per local development, non verrà mappata nel docker compose e non verrà usata da nginx, andrò di SSL offload
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-focal AS build
