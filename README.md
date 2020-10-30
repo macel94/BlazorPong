@@ -39,14 +39,14 @@ dotnet dev-certs https --trust
 
 --LAUNCH http only
 docker run -it --rm -p 80:80 --name aspnetcore_sample mcr.microsoft.com/dotnet/core/samples:aspnetapp
-docker run -it --rm -p 80:80 --name blazorpongwasmserver macel94/blazorpongwasmserver
+docker run -it --rm -p 8000:80 --name blazorpongwasmserver macel94/blazorpongwasmserver
 
 
 --Local dev LAUNCH https
 docker run --rm -it -p 8000:80 -p 8001:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=8001 -e ASPNETCORE_Kestrel__Certificates__Default__Password="asdqwertyu1234QQ123eqw12" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -v $env:USERPROFILE\.aspnet\https:/https/ mcr.microsoft.com/dotnet/core/samples:aspnetapp
 
 --Local dev LAUNCH https blazorpongwasmserver
-docker run --rm -it -p 80:80 -p 443:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=443 -e ASPNETCORE_Kestrel__Certificates__Default__Password="asdqwertyu1234QQ123eqw12" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -v $env:USERPROFILE\.aspnet\https:/https/ macel94/blazorpongwasmserver
+docker run --rm -it -p 8000:80 -p 8001:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=8001 -e ASPNETCORE_Kestrel__Certificates__Default__Password="asdqwertyu1234QQ123eqw12" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -v $env:USERPROFILE\.aspnet\https:/https/ macel94/blazorpongwasmserver
 docker run --rm -it -p 80:80 -p 443:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=443 -e ASPNETCORE_Kestrel__Certificates__Default__Password="" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/var/www/dockerblazorpongwasm.cloud/ -v %USERPROFILE%\.aspnet\https:/https/ macel94/blazorpongwasmserver
 docker run --rm -it -p 80:80 -p 443:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=443 -e ASPNETCORE_Kestrel__Certificates__Default__Password="" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/mycertificatename.pfx -v %USERPROFILE%\.aspnet\https:/https/ aspnetcore-react:latest
 
@@ -61,3 +61,8 @@ https://stackoverflow.com/questions/42863913/key-load-public-invalid-format
 sudo snap install core; sudo snap refresh core
 sudo snap install --classic certbot
 sudo certbot certonly --webroot --agree-tos --email email@domain.it address -d dockerblazorpongwasm.cloud -w /var/www/dockerblazorpongwasm.cloud/
+
+**DockerCompose**
+cd BlazorPong
+docker-compose -f "Docker-Compose.yml" up -d --build
+docker-compose -f "Docker-Compose.yml" down --remove-orphans

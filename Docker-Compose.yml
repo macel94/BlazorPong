@@ -1,0 +1,29 @@
+version: '3.8'
+
+networks:
+  corp:
+    driver: bridge
+
+services:
+  aspnetcoreapp:
+    build:
+      context: .
+      dockerfile: Dockerfile-BlazorPongWasm-Server
+    container_name: aspnetcoreapp
+    networks:
+      - corp
+    ports:
+      - '5000:80'
+      - '5001:443'
+  reverse-proxy:
+    container_name: reverse-proxy
+    networks:
+      - corp
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    ports:
+      - '443:443'
+      - '80:80'
+    depends_on:
+      - 'aspnetcoreapp'

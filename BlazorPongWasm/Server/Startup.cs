@@ -2,6 +2,7 @@ using BlazorPong.BL.ServerSide;
 using BlazorPong.BL.ServerSide.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +11,8 @@ namespace BlazorPongWasm.Server
 {
     public class Startup
     {
+        readonly string CorsOrigins = "CorsOrigins";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -26,6 +29,24 @@ namespace BlazorPongWasm.Server
             services.AddSingleton<ServerGameController>();
             services.AddSignalR();
             services.AddHostedService<Broadcaster>();
+            services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | 
+                        ForwardedHeaders.XForwardedProto;
+                    // Only loopback proxies are allowed by default.
+                    // Clear that restriction because forwarders are enabled by explicit 
+                    // configuration.
+                    options.KnownNetworks.Clear();
+                    options.KnownProxies.Clear();
+                });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(CorsOrigins,
+                    builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,6 +69,13 @@ namespace BlazorPongWasm.Server
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            });
+
+            app.UseAuthentication();
+            app.UseCors(CorsOrigins);
 
             app.UseEndpoints(endpoints =>
             {
