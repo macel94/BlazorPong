@@ -26,6 +26,9 @@ https://blazorpongwasm.azurewebsites.net/
 # Credits
 Inspired by https://github.com/coffeeboyds/Demos/tree/master/PongSignalR
 
+# DockerHub
+https://hub.docker.com/r/macel94/blazorpongwasmserver
+
 # Instructions
 psw example: asdqwertyu1234QQ123eqw12
 
@@ -63,6 +66,12 @@ sudo snap install --classic certbot
 sudo certbot certonly --webroot --agree-tos --email email@domain.it address -d dockerblazorpongwasm.cloud -w /var/www/dockerblazorpongwasm.cloud/
 
 **DockerCompose**
+```powershell
+
 cd BlazorPong
+
 docker-compose -f "Docker-Compose.yml" up -d --build
+
 docker-compose -f "Docker-Compose.yml" down --remove-orphans
+
+```
