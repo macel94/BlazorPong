@@ -25,6 +25,11 @@ https://blazorpongwasm.azurewebsites.net/
 
 # Credits
 Inspired by https://github.com/coffeeboyds/Demos/tree/master/PongSignalR
+https://docs.microsoft.com/en-us/aspnet/core/security/docker-https?view=aspnetcore-3.1
+https://codeburst.io/load-balancing-an-asp-net-core-web-app-using-nginx-and-docker-66753eb08204
+https://nginx.org/en/docs
+https://www.c-sharpcorner.com/article/fun-with-docker-compose-using-net-core-and-nginx/
+https://github.com/jongio/BlazorDocker
 
 # DockerHub
 https://hub.docker.com/r/macel94/blazorpongwasmserver
@@ -53,9 +58,6 @@ docker run --rm -it -p 8000:80 -p 8001:443 -e ASPNETCORE_URLS="https://+;http://
 docker run --rm -it -p 80:80 -p 443:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=443 -e ASPNETCORE_Kestrel__Certificates__Default__Password="" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/var/www/dockerblazorpongwasm.cloud/ -v %USERPROFILE%\.aspnet\https:/https/ macel94/blazorpongwasmserver
 docker run --rm -it -p 80:80 -p 443:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=443 -e ASPNETCORE_Kestrel__Certificates__Default__Password="" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/mycertificatename.pfx -v %USERPROFILE%\.aspnet\https:/https/ aspnetcore-react:latest
 
-
---reference 
-https://docs.microsoft.com/en-us/aspnet/core/security/docker-https?view=aspnetcore-3.1
 
 --ssh
 https://stackoverflow.com/questions/42863913/key-load-public-invalid-format

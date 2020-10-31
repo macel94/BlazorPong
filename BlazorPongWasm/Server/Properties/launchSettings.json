@@ -44,7 +44,8 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "publishAllPorts": true,
       "useSSL": true,
-      "httpPort": 5000,
+      "httpPort": 80,
+      "sslPort": 443,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Prod"
       },

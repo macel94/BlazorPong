@@ -2,13 +2,12 @@
 # cd BlazorPong
 # docker build --pull --rm -f "BlazorPongWasm/Server/Dockerfile" -t blazorpong:latest "."
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-focal AS base
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine AS base
 WORKDIR /app
-EXPOSE 5000
-#La espongo solo per local development, non verrà mappata nel docker compose e non verrà usata da nginx, andrò di SSL offload
-EXPOSE 5001
+EXPOSE 80
+EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-focal AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
 WORKDIR /src
 COPY ["/BlazorPongWasm/Server/BlazorPongWasm.Server.csproj", "BlazorPongWasm/Server/"]
 COPY ["/BlazorPong.BL/BlazorPong.BL.csproj", "BlazorPong.BL/"]
