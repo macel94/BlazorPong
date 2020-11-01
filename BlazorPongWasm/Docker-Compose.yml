@@ -7,7 +7,7 @@ networks:
 services:
   aspnetcoreapp:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile-BlazorPongWasm-Server
     container_name: aspnetcoreapp
     networks:
@@ -23,7 +23,7 @@ services:
     networks:
       - corp
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile-nginx
     ports:
       - '80:80'
