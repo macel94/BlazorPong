@@ -1,0 +1,28 @@
+version: '3.8'
+
+networks:
+  corp:
+    driver: bridge
+
+services:
+  aspnetcoreapp:
+    image: macel94/blazorpong_aspnetcoreapp
+    container_name: aspnetcoreapp
+    networks:
+      - corp
+    ports:
+      - '5000:80'
+      - '5001:443'
+    environment: 
+      ASPNETCORE_URLS: http://+:5000
+
+  reverse-proxy:
+    container_name: reverse-proxy
+    networks:
+      - corp
+    image: macel94/blazorpong_reverse-proxy
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - 'aspnetcoreapp'
