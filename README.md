@@ -91,7 +91,8 @@ Check for OpenSSH Authentication Agent service, mine was disabled.
 
 It also needs to be updated so you can ssh-add correctly: https://github.com/PowerShell/Win32-OpenSSH/issues/1263#issuecomment-499542944
 
-...still no luck. i ended up using scp scp .\Docker-Compose.PROD.yml root@host:app 
+...still no luck. i ended up using scp
+scp .\Docker-Compose.PROD.yml root@host:app 
 
 Then ssh on machine as root
 cd app

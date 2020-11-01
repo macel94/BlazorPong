@@ -6,7 +6,7 @@ networks:
 
 services:
   aspnetcoreapp:
-    image: macel94/blazorpong_aspnetcoreapp
+    image: macel94/blazorpongwasm_aspnetcoreapp
     container_name: aspnetcoreapp
     networks:
       - corp
@@ -20,7 +20,7 @@ services:
     container_name: reverse-proxy
     networks:
       - corp
-    image: macel94/blazorpong_reverse-proxy
+    image: macel94/blazorpongwasm_reverse-proxy
     ports:
       - '80:80'
       - '443:443'
