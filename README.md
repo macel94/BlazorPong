@@ -77,3 +77,23 @@ docker-compose -f "Docker-Compose.yml" up -d --build
 docker-compose -f "Docker-Compose.yml" down --remove-orphans
 
 ```
+
+**PROD DEPLOY**
+docker context create remote --docker "host=ssh://root@HOST"
+CD source\repos\MACEL94\BlazorPong\BlazorPongWasm
+docker-compose -c remote -f Docker-Compose.PROD.yml up
+
+If you get paramiko.ssh_exception.PasswordRequiredException: private key file is encrypted
+and you can't use ssh-agent on windows:
+ssh-agent -s --> unable to start ssh-agent service, error :1058
+
+Check for OpenSSH Authentication Agent service, mine was disabled.
+
+It also needs to be updated so you can ssh-add correctly: https://github.com/PowerShell/Win32-OpenSSH/issues/1263#issuecomment-499542944
+
+...still no luck. i ended up using scp scp .\Docker-Compose.PROD.yml root@host:app 
+
+Then ssh on machine as root
+cd app
+docker-compose -f "Docker-Compose.PROD.yml" down --remove-orphans
+docker-compose -f "Docker-Compose.PROD.yml" up -d --build
