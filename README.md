@@ -30,6 +30,7 @@ https://codeburst.io/load-balancing-an-asp-net-core-web-app-using-nginx-and-dock
 https://nginx.org/en/docs
 https://www.c-sharpcorner.com/article/fun-with-docker-compose-using-net-core-and-nginx/
 https://github.com/jongio/BlazorDocker
+https://medium.com/@dbillinghamuk/certbot-certificate-verification-through-nginx-container-710c299ec549
 
 # DockerHub
 https://hub.docker.com/r/macel94/blazorpongwasmserver
@@ -98,3 +99,9 @@ Then ssh on machine as root
 cd app
 docker-compose -f "Docker-Compose.PROD.yml" down --remove-orphans
 docker-compose -f "Docker-Compose.PROD.yml" up -d --build
+
+sudo certbot certonly --webroot -w /root/certs-data/ -d dockerblazorpongwasm.cloud -d www.dockerblazorpongwasm.cloud
+
+Save certificates to localhost
+scp -r user@your.server.example.com:/path/to/foo /home/user/Desktop/
+
