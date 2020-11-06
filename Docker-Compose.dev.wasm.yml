@@ -1,3 +1,6 @@
+#docker-compose -f "Docker-Compose.dev.wasm.yml" up --build
+#docker-compose -f "Docker-Compose.dev.wasm.yml" down --remove-orphans
+#docker-compose -f "Docker-Compose.dev.wasm.yml" kill
 version: '3.8'
 
 networks:
@@ -7,7 +10,7 @@ networks:
 services:
   aspnetcoreapp:
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile-BlazorPongWasm-Server
     container_name: aspnetcoreapp
     networks:
@@ -21,12 +24,12 @@ services:
   reverse-proxy:
     container_name: reverse-proxy
     volumes:
-      - /root/certs-data/:/data/letsencrypt/
-      - /etc/letsencrypt/:/etc/letsencrypt/
+      - ./NGINX/DEV/root/certs-data/:/data/letsencrypt/
+      - ./NGINX/DEV/etc/letsencrypt/:/etc/letsencrypt/
     networks:
       - corp
     build:
-      context: ..
+      context: ./NGINX/DEV
       dockerfile: Dockerfile-nginx
     ports:
       - '80:80'

@@ -3,7 +3,6 @@ FROM nginx
 EXPOSE 80
 EXPOSE 443
 
-COPY */**/nginx.conf /etc/nginx
-COPY */**/proxy.conf /etc/nginx
+COPY *.conf /etc/nginx/
 
 CMD ["nginx", "-g", "daemon off;"]

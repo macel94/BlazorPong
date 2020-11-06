@@ -105,3 +105,26 @@ sudo certbot certonly --webroot -w /root/certs-data/ -d dockerblazorpongwasm.clo
 Save certificates to localhost
 scp -r user@your.server.example.com:/path/to/foo /home/user/Desktop/
 
+To generate localhost SSL
+Create Dockerfile
+# we use the tiny alpine linux as base
+FROM alpine
+
+# install openssl
+RUN apk update && \
+  apk add --no-cache openssl && \
+  rm -rf "/var/cache/apk/*"
+
+# create and set mount volume
+WORKDIR /openssl-certs
+VOLUME  /openssl-certs
+
+ENTRYPOINT ["openssl"]
+
+use it 
+docker build -t my-openssl:latest .
+
+docker run -it --rm -v "C:/some/path:/openssl-certs" my-openssl
+req -newkey rsa:2048 -keyout privkey.pem -x509 -days 365 -out fullchain.pem
+
+no luck, try with pfx certificate with nginx
