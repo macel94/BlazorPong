@@ -1,8 +1,10 @@
+ARG dev_or_prod=DEV
+
 FROM nginx
 
 EXPOSE 80
 EXPOSE 443
 
-COPY *.conf /etc/nginx/
+COPY NGINX/*.conf /etc/nginx/
 
 CMD ["nginx", "-g", "daemon off;"]

@@ -9,6 +9,7 @@ networks:
 
 services:
   aspnetcoreapp:
+    image: macel94/blazorpongwasm_aspnetcoreapp
     build:
       context: .
       dockerfile: Dockerfile-BlazorPongWasm-Server
@@ -22,6 +23,7 @@ services:
       ASPNETCORE_URLS: http://+:5000
 
   reverse-proxy:
+    image: macel94/blazorpongwasm_reverse-proxy
     container_name: reverse-proxy
     volumes:
       - ./NGINX/DEV/root/certs-data/:/data/letsencrypt/
@@ -29,7 +31,7 @@ services:
     networks:
       - corp
     build:
-      context: ./NGINX/DEV
+      context: .
       dockerfile: Dockerfile-nginx
     ports:
       - '80:80'
