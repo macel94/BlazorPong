@@ -1,22 +1,12 @@
 variables:
   Parameters.RestoreBuildProjects: '**/BlazorPongServer.csproj'
   Parameters.TestProjects: '**/*Tests/*.csproj'
-  BuildPlatform: 'x86'
-  buildConfiguration: 'Release'
-  Parameters.ArtifactName: 'Drop'
+  BuildConfiguration: 'Release'
 
 pool:
   name: Hosted Windows 2019 with VS2019
 
 steps:
-- task: UseDotNet@2
-  displayName: 'Use .NET Core sdk 3.x'
-  inputs:
-    version: '3.0.100-preview8-013656'
-    includePreviewVersions: true
-  enabled: false
-  timeoutInMinutes: 5
-
 - task: DotNetCoreCLI@2
   displayName: Restore
   inputs:
