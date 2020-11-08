@@ -1,7 +1,7 @@
 variables:
   Parameters.RestoreBuildProjects: '**/*BlazorPongWasm.Server.csproj'
   Parameters.TestProjects: '**/*Tests/*.csproj'
-  BuildPlatform: 'Any CPU'
+  BuildPlatform: 'x86'
   buildConfiguration: 'Release'
   Parameters.ArtifactName: 'Drop'
 
