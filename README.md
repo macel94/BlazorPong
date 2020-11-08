@@ -18,10 +18,13 @@ Build status: [![Build status](https://francesco-belacca.visualstudio.com/Blazor
 
 Deploy status: ![Deployment Status](https://francesco-belacca.vsrm.visualstudio.com/_apis/public/Release/badge/ce5f42c0-8688-4de0-b486-36c5cebb3c0b/2/2)
 
-# Websites
-https://blazorpong-dev-as.azurewebsites.net/
+**Docker Images BuildnPush**
+Deploy status: ![Deployment Status](https://vsrm.dev.azure.com/francesco-belacca/_apis/public/Release/badge/ce5f42c0-8688-4de0-b486-36c5cebb3c0b/3/3)
 
-https://blazorpongwasm.azurewebsites.net/
+# Websites
+Server --> https://blazorpong-dev-as.azurewebsites.net/
+Wasm --> https://blazorpongwasm.azurewebsites.net/
+Wasm with Docker and NGINX --> https://www.dockerblazorpongwasm.cloud/
 
 # Credits
 Inspired by https://github.com/coffeeboyds/Demos/tree/master/PongSignalR
