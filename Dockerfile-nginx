@@ -1,5 +1,3 @@
-ARG dev_or_prod=DEV
-
 FROM nginx
 
 EXPOSE 80
