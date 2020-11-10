@@ -8,6 +8,17 @@ networks:
     driver: bridge
 
 services:
+  sql01:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    networks:
+      - corp
+    ports:
+      - '1433:1433'
+    environment: 
+      ACCEPT_EULA: 'Y'
+      SA_PASSWORD: yourStrong(!)Password
+      MSSQL_PID: Express
+
   aspnetcoreapp:
     image: macel94/blazorpongwasm_aspnetcoreapp
     build:
@@ -21,6 +32,8 @@ services:
       - '5001:443'
     environment: 
       ASPNETCORE_URLS: http://+:5000
+    depends_on:
+      - 'sql01'
 
   reverse-proxy:
     image: macel94/blazorpongwasm_reverse-proxy
@@ -38,3 +51,5 @@ services:
       - '443:443'
     depends_on:
       - 'aspnetcoreapp'
+
+  
