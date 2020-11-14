@@ -5,7 +5,7 @@ networks:
     driver: bridge
 
 services:
-  sql01:
+  mssql01:
     container_name: mssql01
     image: mcr.microsoft.com/mssql/server:2019-latest
     networks:
