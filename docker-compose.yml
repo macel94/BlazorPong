@@ -8,7 +8,8 @@ networks:
     driver: bridge
 
 services:
-  sql01:
+  mssql01:
+    container_name: mssql01
     image: mcr.microsoft.com/mssql/server:2019-latest
     networks:
       - corp
@@ -33,7 +34,7 @@ services:
     environment: 
       ASPNETCORE_URLS: http://+:5000
     depends_on:
-      - 'sql01'
+      - 'mssql01'
 
   reverse-proxy:
     image: macel94/blazorpongwasm_reverse-proxy
