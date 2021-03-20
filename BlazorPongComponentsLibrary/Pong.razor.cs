@@ -40,13 +40,13 @@ namespace BlazorPong.Components
             ConnectionTypesDictionary = new Dictionary<string, HttpTransportType>()
             {
                 {
-                    "WebSockets", HttpTransportType.WebSockets
+                    nameof(HttpTransportType.WebSockets), HttpTransportType.WebSockets
                 },
                 {
-                    "LongPolling", HttpTransportType.LongPolling
+                    nameof(HttpTransportType.LongPolling), HttpTransportType.LongPolling
                 },
                 {
-                    "ServerSentEvents", HttpTransportType.ServerSentEvents
+                    nameof(HttpTransportType.ServerSentEvents), HttpTransportType.ServerSentEvents
                 },
             };
             _connectionTypeChoice = HttpTransportType.WebSockets;
