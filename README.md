@@ -109,7 +109,9 @@ Save certificates to localhost
 scp -r user@your.server.example.com:/path/to/foo /home/user/Desktop/
 
 To generate localhost SSL
-Create Dockerfile
+Use this Dockerfile
+
+```Docker
 # we use the tiny alpine linux as base
 FROM alpine
 
@@ -123,8 +125,10 @@ WORKDIR /openssl-certs
 VOLUME  /openssl-certs
 
 ENTRYPOINT ["openssl"]
+```
 
-use it 
+to use it 
+```bash
 docker build -t my-openssl:latest .
 
 docker run -it --rm -v "C:/some/path:/openssl-certs" my-openssl
@@ -132,3 +136,4 @@ req -newkey rsa:2048 -keyout privkey.pem -x509 -days 365 -out fullchain.pem
 
 req -x509 -nodes -new -sha256 -days 1024 -newkey rsa:2048 -keyout privkey.pem -out fullchain.pem
 x509 -outform pem -in fullchain.pem -out RootCA.crt
+```
