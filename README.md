@@ -36,7 +36,7 @@ https://github.com/jongio/BlazorDocker
 https://medium.com/@dbillinghamuk/certbot-certificate-verification-through-nginx-container-710c299ec549
 
 # DockerHub
-https://hub.docker.com/r/macel94/blazorpongwasmserver
+https://hub.docker.com/u/macel94
 
 # Instructions
 psw example: asdqwertyu1234QQ123eqw12
